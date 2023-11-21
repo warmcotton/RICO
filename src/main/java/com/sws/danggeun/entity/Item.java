@@ -16,17 +16,15 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class Item {
     @Id @Column(name = "item_id") @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @Column(nullable = false)
     private int price;
     @Column(nullable = false)
     private int quantity;
     @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
     private User user;
-    @JoinColumn(name = "cart_id") @ManyToOne(fetch = FetchType.LAZY)
-    private Cart cart;
-    @JoinColumn(name = "image_id") @ManyToOne(fetch = FetchType.LAZY)
-    private Image image;
+    @JoinColumn(name = "item_image_id") @ManyToOne(fetch = FetchType.LAZY)
+    private ItemImage image;
     @CreatedDate @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
