@@ -18,8 +18,6 @@ public class Cart {
     private Long id;
     @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
     private User user;
-    @JoinColumn(name = "item_id") @ManyToOne(fetch = FetchType.LAZY)
-    private Item item;
     @CreatedDate
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
