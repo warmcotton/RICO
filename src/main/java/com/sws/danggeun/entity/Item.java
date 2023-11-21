@@ -23,8 +23,8 @@ public class Item {
     private int quantity;
     @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
     private User user;
-    @JoinColumn(name = "item_image_id") @ManyToOne(fetch = FetchType.LAZY)
-    private ItemImage image;
+    @JoinColumn(name = "item_img_id") @ManyToOne(fetch = FetchType.LAZY)
+    private ItemImg image;
     @CreatedDate @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
