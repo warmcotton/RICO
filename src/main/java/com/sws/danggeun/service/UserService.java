@@ -23,6 +23,7 @@ public class UserService {
 
     public User 변환(UserDto userDto) {
         User newUser = User.getInstance(userDto.getEmail(), userDto.getPassword(), userDto.getName());
+        return newUser;
     }
 
     //중복확인
