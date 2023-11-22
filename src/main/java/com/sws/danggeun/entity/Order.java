@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class Order {
     @Id @Column(name = "order_id") @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @Column
     private int price;
     @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
     private User user;
@@ -26,7 +26,11 @@ public class Order {
     private LocalDateTime orderDate;
 
 
+    public static Order getInstance(User user, OrderStatus status) {
+        Order newOrder = new Order();
+        newOrder.setUser(user);
+        newOrder.setStatus(status);
 
-
-
+        return newOrder;
+    }
 }

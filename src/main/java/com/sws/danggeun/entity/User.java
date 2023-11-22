@@ -19,4 +19,13 @@ public class User {
     private String name;
     @Enumerated(value = EnumType.STRING)
     private Role role;
+
+    public static User getInstance(String email, String password, String name) {
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setPassword(password); //인코더
+        newUser.setName(name);
+
+        return newUser;
+    }
 }

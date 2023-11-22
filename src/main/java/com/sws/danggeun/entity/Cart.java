@@ -22,4 +22,7 @@ public class Cart {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
+    public static Cart newInstance(Long id) {
+        return null;
+    }
 }
