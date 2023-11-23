@@ -17,4 +17,24 @@ public class CartItem {
     private Item item;
     @JoinColumn(name = "cart_id") @ManyToOne(fetch = FetchType.LAZY)
     private Cart cart;
+
+
+    public static CartItem getInstance(int quantity, Item item, Cart newCart) {
+        CartItem cartItem = new CartItem();
+        cartItem.setCount(quantity);
+        cartItem.setItem(item);
+        cartItem.setCart(newCart);
+
+        return cartItem;
+    }
+
+    @Override
+    public String toString() {
+        return "CartItem{" +
+                "id=" + id +
+                ", count=" + count +
+                //", item=" + item +
+                //", cart=" + cart +
+                '}';
+    }
 }

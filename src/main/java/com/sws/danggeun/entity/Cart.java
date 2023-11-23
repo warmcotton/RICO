@@ -22,7 +22,18 @@ public class Cart {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
-    public static Cart newInstance(Long id) {
-        return null;
+    public static Cart getInstance(User user) {
+        Cart cart = new Cart();
+        cart.setUser(user);
+        return cart;
+    }
+
+    @Override
+    public String toString() {
+        return "Cart{" +
+                "id=" + id +
+                //", user=" + user +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

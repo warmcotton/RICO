@@ -25,12 +25,22 @@ public class Order {
     @CreatedDate @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime orderDate;
 
-
     public static Order getInstance(User user, OrderStatus status) {
         Order newOrder = new Order();
         newOrder.setUser(user);
         newOrder.setStatus(status);
 
         return newOrder;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", price=" + price +
+                //", user=" + user +
+                ", status=" + status +
+                ", orderDate=" + orderDate +
+                '}';
     }
 }

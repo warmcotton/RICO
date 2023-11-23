@@ -18,14 +18,39 @@ public class Item {
     @Id @Column(name = "item_id") @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
+    private String name;
+    @Column(nullable = false)
     private int price;
     @Column(nullable = false)
     private int quantity;
+    @Enumerated(EnumType.STRING)
+    private ItemStatus itemStatus;
     @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
     private User user;
-    @JoinColumn(name = "item_img_id") @ManyToOne(fetch = FetchType.LAZY)
-    private ItemImg image;
     @CreatedDate @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
+    public static Item getInstance(String name, int price, int quantity, ItemStatus itemStatus, User user) {
+        Item item = new Item();
+        item.setName(name);
+        item.setPrice(price);
+        item.setQuantity(quantity);
+        item.setItemStatus(itemStatus);
+        item.setUser(user);
+
+        return item;
+    }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", quantity=" + quantity +
+                ", itemStatus=" + itemStatus +
+                //", user=" + user +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }
