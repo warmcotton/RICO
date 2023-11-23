@@ -3,7 +3,6 @@ package com.sws.danggeun.service;
 import com.sws.danggeun.dto.UserDto;
 import com.sws.danggeun.entity.User;
 import com.sws.danggeun.repository.UserRepository;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +16,8 @@ public class UserService {
     //회원가입
     public User 회원가입(UserDto userDto) throws Exception {
         if (중복확인(userDto.getEmail())) throw new Exception("이메일 중복");
-        User user = 변환(userDto);
+        User user = User.getInstance(userDto.getEmail(), userDto.getPassword(), userDto.getName());
         return userRepository.save(user);
-    }
-
-    public User 변환(UserDto userDto) {
-        User newUser = User.getInstance(userDto.getEmail(), userDto.getPassword(), userDto.getName());
-        return newUser;
     }
 
     //중복확인
