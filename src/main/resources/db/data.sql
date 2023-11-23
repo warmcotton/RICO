@@ -1,1 +1,0 @@
-insert into USER values ('sws@naver.com','1111','sws','ADMIN');
