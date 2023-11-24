@@ -1,7 +1,10 @@
 package com.sws.danggeun.service;
 
+import com.sws.danggeun.dto.ItemDto;
 import com.sws.danggeun.dto.OrderDto;
 import com.sws.danggeun.entity.Cart;
+import com.sws.danggeun.entity.Item;
+import com.sws.danggeun.entity.Order;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,9 +28,28 @@ public class ConsumerService {
         Cart ct = cartService.createCartWithSingleItem(id, quantity, email); //createCart x
         cart.add(ct);
 
-        OrderDto orderDto = orderService.order(cart, email);
+        Order order = orderService.order(cart, email);
+        return OrderDto.getInstance(order);
+    }
 
-        return orderDto;
+    public List<ItemDto> viewItemList() {
+        List<Item> itemList = itemService.getItems();
+        List<ItemDto> itemDtoList = new ArrayList<>();
+        for(Item i : itemList) {
+            ItemDto newItemDto = ItemDto.getDto(i);
+            itemDtoList.add(newItemDto);
+        }
+        return itemDtoList;
+    }
+
+    public List<OrderDto> viewOrderList(String email) {
+        List<Order> orderList = orderService.getOrders(email);
+        List<OrderDto> orderDtoList = new ArrayList<>();
+        for(Order o : orderList) {
+            OrderDto orderDto = OrderDto.getInstance(o);
+            orderDtoList.add(orderDto);
+        }
+        return orderDtoList;
     }
 
 }
