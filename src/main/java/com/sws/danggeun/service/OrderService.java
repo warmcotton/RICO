@@ -16,7 +16,11 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
-
+    //조회
+    public Order getOrder(Long id) {
+        return orderRepository.findById(id).get();
+    }
+    //주문
     public Order order(List<Cart> cartList, String email) { //상품 수량 확인 -> ( 아이템 수량 차감 -> 주문 ) 하나의 트랜잭션
         User user = userRepository.findByEmail(email).get();
         Order newOrder = orderRepository.save(Order.getInstance(user, OrderStatus.ORDER));
@@ -37,6 +41,13 @@ public class OrderService {
         }
         newOrder.setPrice(total);
         return newOrder;
+    }
+    //주문취소 : 수량업데이트
+    public void deleteOrder(Long id) throws Exception {
+        Order order = getOrder(id);
+        if(order.getStatus()==OrderStatus.ORDER) throw new Exception("주문 취소 먼저");
+        orderItemRepository.deleteAllByOrder(order);
+        orderRepository.deleteById(id);
     }
 
     public List<Order> getOrders(String email) {

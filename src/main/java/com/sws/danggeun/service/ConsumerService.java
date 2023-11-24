@@ -75,4 +75,14 @@ public class ConsumerService {
         }
         return orderDtoList;
     }
+    //주문취소
+    public void cancel(Long id) throws Exception {
+        Order order = orderService.getOrder(id);
+        if(order.getStatus()==OrderStatus.CANCEL) throw new Exception("이미 취소됨");
+        List<OrderItem> orderItemList = orderService.getOrderItems(order);
+        for(OrderItem orderItem : orderItemList) {
+            itemService.restore(orderItem.getItem().getId(),orderItem.getCount());
+        }
+        order.setStatus(OrderStatus.CANCEL);
+    }
 }
