@@ -21,7 +21,7 @@ public class OrderDto {
         orderDto.setPrice(order.getPrice());
         orderDto.setStatus(order.getStatus());
         orderDto.setOrderDate(order.getOrderDate());
-        orderDto.setUser(order.getUser().getName());
+        orderDto.setUser(order.getUser().getEmail());
         return orderDto;
     }
     @Override

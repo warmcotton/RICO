@@ -22,7 +22,7 @@ public class ItemDto {
         itemDto.setPrice(i.getPrice());
         itemDto.setQuantity(i.getQuantity());
         itemDto.setItemStatus(i.getItemStatus());
-        itemDto.setUser(i.getUser().getName());
+        itemDto.setUser(i.getUser().getEmail());
 
         return itemDto;
     }
