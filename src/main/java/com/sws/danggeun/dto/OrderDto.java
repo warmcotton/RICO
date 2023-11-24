@@ -13,14 +13,25 @@ public class OrderDto {
     private int price;
     private OrderStatus status;
     private LocalDateTime orderDate;
+    private String user;
 
-    public static OrderDto newInstance(Order order) {
+    public static OrderDto getInstance(Order order) {
         OrderDto orderDto = new OrderDto();
         orderDto.setId(order.getId());
         orderDto.setPrice(order.getPrice());
         orderDto.setStatus(order.getStatus());
         orderDto.setOrderDate(order.getOrderDate());
-
+        orderDto.setUser(order.getUser().getName());
         return orderDto;
+    }
+    @Override
+    public String toString() {
+        return "OrderDto{" +
+                "id=" + id +
+                ", price=" + price +
+                ", status=" + status +
+                ", orderDate=" + orderDate +
+                ", user='" + user + '\'' +
+                '}';
     }
 }
