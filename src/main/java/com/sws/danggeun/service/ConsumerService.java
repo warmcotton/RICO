@@ -4,10 +4,7 @@ import com.sws.danggeun.dto.CartDto;
 import com.sws.danggeun.dto.CartItemDto;
 import com.sws.danggeun.dto.ItemDto;
 import com.sws.danggeun.dto.OrderDto;
-import com.sws.danggeun.entity.Cart;
-import com.sws.danggeun.entity.CartItem;
-import com.sws.danggeun.entity.Item;
-import com.sws.danggeun.entity.Order;
+import com.sws.danggeun.entity.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,17 +19,15 @@ public class ConsumerService {
     private final CartService cartService;
     private final OrderService orderService;
     private final ItemService itemService;
-
     //단일 아이템 주문 : 수량확인 -> 카트생성 -> 주문
     public OrderDto buySingleItem(Long id, int quantity, String email) throws Exception {
         if (!itemService.checkAndReduce(id, quantity)) throw new Exception("수량 없음");
-
         List<Cart> cart = new ArrayList<>();
         Cart ct = cartService.createCartWithSingleItem(id, quantity, email); //createCart x
         cart.add(ct);
-
         Order order = orderService.order(cart, email);
-        return OrderDto.getInstance(order);
+        List<OrderItem> orderItemList = orderService.getOrderItems(order);
+        return OrderDto.getInstance(order, orderItemList);
     }
     //복수 카트 주문
     public OrderDto buyCarts(List<CartDto> cartDtoList, String email) throws Exception{
@@ -40,14 +35,15 @@ public class ConsumerService {
         for (CartDto cartDto : cartDtoList) {
             for(CartItemDto cartItemDto : cartDto.getCartItemDto()) {
                 if (!itemService.checkAndReduce(cartItemDto.getItemId(),cartItemDto.getCount())) throw new Exception("수량 없음");
-
             }
             Cart cart = cartService.getCart(cartDto.getId());
             cartList.add(cart);
         }
         Order order = orderService.order(cartList, email);
-        return OrderDto.getInstance(order);
+        List<OrderItem> orderItemList = orderService.getOrderItems(order);
+        return OrderDto.getInstance(order, orderItemList);
     }
+
     public List<CartDto> viewCartList(String email) {
         List<Cart> cartList = cartService.getCarts(email);
         List<CartDto> cartDtoList = new ArrayList<>();
@@ -73,10 +69,10 @@ public class ConsumerService {
         List<Order> orderList = orderService.getOrders(email);
         List<OrderDto> orderDtoList = new ArrayList<>();
         for(Order o : orderList) {
-            OrderDto orderDto = OrderDto.getInstance(o);
+            List<OrderItem> orderItemList = orderService.getOrderItems(o);
+            OrderDto orderDto = OrderDto.getInstance(o, orderItemList);
             orderDtoList.add(orderDto);
         }
         return orderDtoList;
     }
-
 }

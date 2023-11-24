@@ -16,6 +16,7 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
+
     public Order order(List<Cart> cartList, String email) { //상품 수량 확인 -> ( 아이템 수량 차감 -> 주문 ) 하나의 트랜잭션
         User user = userRepository.findByEmail(email).get();
         Order newOrder = orderRepository.save(Order.getInstance(user, OrderStatus.ORDER));
@@ -37,8 +38,14 @@ public class OrderService {
         newOrder.setPrice(total);
         return newOrder;
     }
+
     public List<Order> getOrders(String email) {
         User user = userRepository.findByEmail(email).get();
         return orderRepository.findByUser(user);
+    }
+
+    public List<OrderItem> getOrderItems(Order order) {
+        List<OrderItem> orderItemList = orderItemRepository.findByOrder(order);
+        return orderItemList;
     }
 }
