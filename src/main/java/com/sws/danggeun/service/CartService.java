@@ -24,11 +24,17 @@ public class CartService {
     private final ItemRepository itemRepository;
 
     //카트조회
-    public Cart searchCart(Long id) {
+    public Cart getCart(Long id) {
         return cartRepository.findById(id).get(); //NoSuchElementException
     }
-    public List<Cart> carts() { return cartRepository.findAll();}
-
+    public List<Cart> getCarts(String email) {
+        User user = userRepository.findByEmail(email).get();
+        return cartRepository.findByUser(user);
+    }
+    public List<CartItem> getCartItems(Cart cart) {
+        List<CartItem> cartItemList = cartItemRepository.findByCart(cart);
+        return cartItemList;
+    }
     //빈 카트생성
     public Cart createCart(String email) {
         User user = userRepository.findByEmail(email).get(); //NoSuchElementException
@@ -50,7 +56,13 @@ public class CartService {
 
         return newCart;
     }
+    public Cart addItem(Long itemId, int quantity, Long cartId) {
+        Cart cart = getCart(cartId);
+        Item item = itemRepository.findById(itemId).get();
 
+        CartItem cartItem = CartItem.getInstance(quantity, item, cart);
+        cartItemRepository.save(cartItem);
 
-
+        return cart;
+    }
 }
