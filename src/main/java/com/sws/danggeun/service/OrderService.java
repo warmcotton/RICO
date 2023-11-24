@@ -1,6 +1,5 @@
 package com.sws.danggeun.service;
 
-import com.sws.danggeun.dto.OrderDto;
 import com.sws.danggeun.entity.*;
 import com.sws.danggeun.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +24,11 @@ public class OrderService {
             List<CartItem> cartItem = cartItemRepository.findByCart(cart);
             int order_item_price = 0;
             for (CartItem cit : cartItem) {
-                List<CartItem> items = cartItemRepository.findByItem(cit.getItem());
-                for(CartItem citem : items) {
-                    int price = citem.getItem().getPrice()*citem.getCount();
-                    order_item_price += price;
-                    OrderItem newOrderItem = OrderItem.getInstance(citem.getItem(),newOrder,citem.getCount(), price);
-                    orderItemRepository.save(newOrderItem);
-                }
+                Item item = cit.getItem();
+                int price = item.getPrice()*cit.getCount();
+                order_item_price += price;
+                OrderItem newOrderItem = OrderItem.getInstance(item,newOrder,cit.getCount(),price);
+                orderItemRepository.save(newOrderItem);
                 cartItemRepository.delete(cit);
             }
             total += order_item_price;
@@ -42,6 +39,6 @@ public class OrderService {
     }
     public List<Order> getOrders(String email) {
         User user = userRepository.findByEmail(email).get();
-        return orderRepository.findAllByUser(user);
+        return orderRepository.findByUser(user);
     }
 }
