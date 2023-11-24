@@ -6,14 +6,12 @@ import com.sws.danggeun.repository.ItemImgRepository;
 import com.sws.danggeun.repository.ItemRepository;
 import com.sws.danggeun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Transactional
@@ -23,7 +21,7 @@ public class ItemService {
     private final UserRepository userRepository; //controller레이어로 이동 고려 -> createItem 에서 파라미터 email 대신 User
     private final ItemImgRepository itemImgRepository;
     //상품생성(판매)
-    public Item createItem(ItemDto itemDto, String email) { //controller에서 dto 검사,
+    public Item saveItem(ItemDto itemDto, String email) { //controller에서 dto 검사,
         User user = userRepository.findByEmail(email).get();
         Item newItem = Item.getInstance(itemDto.getName(),itemDto.getPrice(),
                 itemDto.getQuantity(),itemDto.getItemStatus(),user);
@@ -35,6 +33,43 @@ public class ItemService {
         itemImgRepository.saveAll(newItemImgList);
 
         return newItem;
+    }
+    //상품조회
+    public Item getItem(Long id) {
+        return itemRepository.findById(id).get();
+    }
+    public List<Item> getItems() { return itemRepository.findAll();}
+
+    //상품 수량 차감 : 아이템수량 - 주문수량 비교
+    public boolean checkAndReduce(long id, int quantity) {
+        if (quantity > countItemQuantity(id)) return false;
+        updateItemQuantity(id, quantity);
+        return true;
+    }
+    //상품 정보 업데이트
+    public Item updateItem(ItemDto itemDto, String email) {
+        User user = userRepository.findByEmail(email).get();
+        Item item = getItem(itemDto.getId());
+
+        item.setName(itemDto.getName());
+        item.setPrice(itemDto.getPrice());
+        item.setQuantity(itemDto.getQuantity());
+        item.setItemStatus(itemDto.getItemStatus());
+
+        return item;
+    }
+    //상품 quantity update
+    private void updateItemQuantity(Long id, int quantity) {
+        Item item = getItem(id);
+        int remain = item.getQuantity() - quantity;
+        item.setQuantity(remain);
+        if(remain == 0) item.setItemStatus(ItemStatus.SOLD_OUT);
+        else item.setItemStatus(ItemStatus.FOR_SALE);
+    }
+    //아이템 수량 확인 : 상품 조회 -> 상품 수량 확인
+    private int countItemQuantity(Long id) {
+        Item item = getItem(id);
+        return item.getQuantity();
     }
     private List<ItemImg> temp(Item item, List<String> multi) {
         List<ItemImg> itemImgList = new ArrayList<>();
@@ -48,34 +83,4 @@ public class ItemService {
 
         return itemImgList;
     }
-    //상품조회
-    public Item searchItem(Long id) {
-        return itemRepository.findById(id).get();
-    }
-
-    //상품검색
-
-    //아이템 수량 확인 : 상품 조회 -> 상품 수량 확인
-    private int countItemQuantity(Long id) {
-        Item item = searchItem(id);
-        return item.getQuantity();
-    }
-
-    //상품 수량 차감 : 아이템수량 - 주문수량 비교
-    public boolean checkAndReduce(long id, int quantity) {
-        if (quantity > countItemQuantity(id)) return false;
-        updateItemQuantity(id, quantity);
-        return true;
-    }
-
-    //상품 quantity update
-    private void updateItemQuantity(Long id, int quantity) {
-        Item item = searchItem(id);
-        int remain = item.getQuantity() - quantity;
-        item.setQuantity(remain);
-        if(remain == 0) item.setItemStatus(ItemStatus.SOLD_OUT);
-        else item.setItemStatus(ItemStatus.FOR_SALE);
-
-    }
-
 }
