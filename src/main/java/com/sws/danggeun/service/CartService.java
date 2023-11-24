@@ -1,9 +1,6 @@
 package com.sws.danggeun.service;
 
-import com.sws.danggeun.entity.Cart;
-import com.sws.danggeun.entity.CartItem;
-import com.sws.danggeun.entity.Item;
-import com.sws.danggeun.entity.User;
+import com.sws.danggeun.entity.*;
 import com.sws.danggeun.repository.CartItemRepository;
 import com.sws.danggeun.repository.CartRepository;
 import com.sws.danggeun.repository.ItemRepository;
@@ -24,14 +21,16 @@ public class CartService {
     private final ItemRepository itemRepository;
     //카트조회
     public Cart getCart(Long id) {
-        return cartRepository.findById(id).get(); //NoSuchElementException
+        return cartRepository.findById(id).get();
     }
-
+    //카트목록조회
     public List<Cart> getCarts(String email) {
         User user = userRepository.findByEmail(email).get();
         return cartRepository.findByUser(user);
     }
-
+    //카트상품조회
+    public CartItem getCartItem(Long id) { return cartItemRepository.findById(id).get(); }
+    //카트상품목록조회
     public List<CartItem> getCartItems(Cart cart) {
         List<CartItem> cartItemList = cartItemRepository.findByCart(cart);
         return cartItemList;
@@ -48,19 +47,25 @@ public class CartService {
         cartRepository.deleteById(id);
     }
     //단일아이템카트주문
-    public Cart createCartWithSingleItem(Long id, int quantity, String email) {
+    public Cart createCartWithSingleItem(Long id, int quantity, String email) throws Exception {
         Cart newCart = createCart(email);
         Item item = itemRepository.findById(id).get();
+        if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new Exception("판매중 아님");
         CartItem cartItem = CartItem.getInstance(quantity, item, newCart);
         cartItemRepository.save(cartItem);
         return newCart;
     }
-
-    public Cart addItem(Long itemId, int quantity, Long cartId) {
+    //카트상품담기
+    public Cart addItemToCart(Long itemId, int quantity, Long cartId) throws Exception {
         Cart cart = getCart(cartId);
         Item item = itemRepository.findById(itemId).get();
+        if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new Exception("판매중 아님");
         CartItem cartItem = CartItem.getInstance(quantity, item, cart);
         cartItemRepository.save(cartItem);
         return cart;
+    }
+    //카트상품삭제
+    public void deleteCartItem(Long cartItemId) {
+        cartItemRepository.deleteById(cartItemId);
     }
 }
