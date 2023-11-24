@@ -18,29 +18,17 @@ public class Order {
     private Long id;
     @Column
     private int price;
-    @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     @CreatedDate @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime orderDate;
+    @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
 
     public static Order getInstance(User user, OrderStatus status) {
         Order newOrder = new Order();
-        newOrder.setUser(user);
         newOrder.setStatus(status);
-
+        newOrder.setUser(user);
         return newOrder;
-    }
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "id=" + id +
-                ", price=" + price +
-                //", user=" + user +
-                ", status=" + status +
-                ", orderDate=" + orderDate +
-                '}';
     }
 }

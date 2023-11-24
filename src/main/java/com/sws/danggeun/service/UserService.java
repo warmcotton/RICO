@@ -19,20 +19,18 @@ public class UserService {
         User user = User.getInstance(userDto.getEmail(), userDto.getPassword(), userDto.getName());
         return userRepository.save(user);
     }
-
     //중복확인
     public boolean 중복확인(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
-
     //로그인
-    
+
     //구매내역
-    
+
     //판매내역
-    
+
     //활동기록
-    
+
     //회원조회
     
     //회원정보

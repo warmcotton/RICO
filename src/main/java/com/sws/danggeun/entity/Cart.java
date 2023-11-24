@@ -27,13 +27,4 @@ public class Cart {
         cart.setUser(user);
         return cart;
     }
-
-    @Override
-    public String toString() {
-        return "Cart{" +
-                "id=" + id +
-                //", user=" + user +
-                ", createdAt=" + createdAt +
-                '}';
-    }
 }

@@ -26,7 +26,6 @@ public class OrderItem {
         newOrderItem.setOrder(order);
         newOrderItem.setCount(count);
         newOrderItem.setPrice(price);
-
         return newOrderItem;
     }
 }

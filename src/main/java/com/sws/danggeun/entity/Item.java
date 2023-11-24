@@ -25,10 +25,10 @@ public class Item {
     private int quantity;
     @Enumerated(EnumType.STRING)
     private ItemStatus itemStatus;
-    @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
     @CreatedDate @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
+    @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
 
     public static Item getInstance(String name, int price, int quantity, ItemStatus itemStatus, User user) {
         Item item = new Item();
@@ -37,20 +37,6 @@ public class Item {
         item.setQuantity(quantity);
         item.setItemStatus(itemStatus);
         item.setUser(user);
-
         return item;
-    }
-
-    @Override
-    public String toString() {
-        return "Item{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", quantity=" + quantity +
-                ", itemStatus=" + itemStatus +
-                //", user=" + user +
-                ", createdAt=" + createdAt +
-                '}';
     }
 }

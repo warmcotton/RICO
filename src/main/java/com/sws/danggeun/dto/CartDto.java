@@ -12,16 +12,15 @@ import java.util.stream.Collectors;
 @Getter @Setter
 public class CartDto {
     private Long id;
-    private String user;
-    private List<CartItemDto> cartItemDto;
     private LocalDateTime date;
+    private List<CartItemDto> cartItemDto;
+    private String user;
     public static CartDto getInstance(Cart c, List<CartItem> cartItemList) {
         CartDto cartDto = new CartDto();
         cartDto.setId(c.getId());
-        cartDto.setUser(c.getUser().getEmail());        
-        cartDto.setCartItemDto(cartItemList.stream().map(CartItemDto::getInstance).collect(Collectors.toList()));
         cartDto.setDate(c.getCreatedAt());
-
+        cartDto.setCartItemDto(cartItemList.stream().map(CartItemDto::getInstance).collect(Collectors.toList()));
+        cartDto.setUser(c.getUser().getEmail());
         return cartDto;
     }
 

@@ -25,7 +25,6 @@ public class User {
         newUser.setEmail(email);
         newUser.setPassword(password); //인코더
         newUser.setName(name);
-
         return newUser;
     }
 }
