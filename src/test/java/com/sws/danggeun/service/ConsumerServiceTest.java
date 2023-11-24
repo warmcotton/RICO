@@ -56,30 +56,29 @@ class ConsumerServiceTest {
 
     @Test
     void buySingleItem() throws Exception {
-        Item item = create("sws@naver.com");
+        Item newitem = create("sws@naver.com");
 
-        consumerService.buySingleItem(item.getId(),5, "sws@naver.com");
-        Item update = itemRepository.findById(item.getId()).get();
+        List<OrderDto> order = consumerService.viewOrderList("sws@naver.com");
+        List<ItemDto> item = consumerService.viewItemList();
+        List<CartDto> cart = consumerService.viewCartList("sws@naver.com");
+
+        order.forEach(System.out::println);
+        item.forEach(System.out::println);
+        cart.forEach(System.out::println);
+
+        consumerService.buySingleItem(newitem.getId(),10, "sws@naver.com");
+
+        Item update = itemRepository.findById(newitem.getId()).get();
 
         List<OrderDto> orders = consumerService.viewOrderList("sws@naver.com");
         List<ItemDto> items = consumerService.viewItemList();
-        List<CartItem> cartitems = cartItemRepository.findAll();
-        List<Cart> carts = cartRepository.findAll();
+        List<CartDto> carts = consumerService.viewCartList("sws@naver.com");
 
-        for(OrderDto o : orders) {
-            System.out.println(o);
-        }
-        for(ItemDto i : items) {
-            System.out.println(i);
-        }
-        for(Cart c : carts) {
-            System.out.println(c);
-        }
-        for(CartItem ci : cartitems) {
-            System.out.println(ci);
-        }
+        orders.forEach(System.out::println);
+        items.forEach(System.out::println);
+        carts.forEach(System.out::println);
 
-        assertAll("buy", () -> assertEquals(5,update.getQuantity())
+        assertAll("buy", () -> assertEquals(0,update.getQuantity())
                 );
     }
 
