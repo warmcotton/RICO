@@ -1,8 +1,11 @@
 package com.sws.danggeun.service;
 
+import com.sws.danggeun.dto.CartDto;
+import com.sws.danggeun.dto.CartItemDto;
 import com.sws.danggeun.dto.ItemDto;
 import com.sws.danggeun.dto.OrderDto;
 import com.sws.danggeun.entity.Cart;
+import com.sws.danggeun.entity.CartItem;
 import com.sws.danggeun.entity.Item;
 import com.sws.danggeun.entity.Order;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,30 @@ public class ConsumerService {
 
         Order order = orderService.order(cart, email);
         return OrderDto.getInstance(order);
+    }
+    //복수 카트 주문
+    public OrderDto buyCarts(List<CartDto> cartDtoList, String email) throws Exception{
+        List<Cart> cartList = new ArrayList<>();
+        for (CartDto cartDto : cartDtoList) {
+            for(CartItemDto cartItemDto : cartDto.getCartItemDto()) {
+                if (!itemService.checkAndReduce(cartItemDto.getItemId(),cartItemDto.getCount())) throw new Exception("수량 없음");
+
+            }
+            Cart cart = cartService.getCart(cartDto.getId());
+            cartList.add(cart);
+        }
+        Order order = orderService.order(cartList, email);
+        return OrderDto.getInstance(order);
+    }
+    public List<CartDto> viewCartList(String email) {
+        List<Cart> cartList = cartService.getCarts(email);
+        List<CartDto> cartDtoList = new ArrayList<>();
+        for(Cart c : cartList) {
+            List<CartItem> cartItemList = cartService.getCartItems(c);
+            CartDto newCartDto = CartDto.getInstance(c, cartItemList);
+            cartDtoList.add(newCartDto);
+        }
+        return cartDtoList;
     }
 
     public List<ItemDto> viewItemList() {
