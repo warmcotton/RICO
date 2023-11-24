@@ -22,15 +22,16 @@ public class CartService {
     private final UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
     private final ItemRepository itemRepository;
-
     //카트조회
     public Cart getCart(Long id) {
         return cartRepository.findById(id).get(); //NoSuchElementException
     }
+
     public List<Cart> getCarts(String email) {
         User user = userRepository.findByEmail(email).get();
         return cartRepository.findByUser(user);
     }
+
     public List<CartItem> getCartItems(Cart cart) {
         List<CartItem> cartItemList = cartItemRepository.findByCart(cart);
         return cartItemList;
@@ -40,29 +41,26 @@ public class CartService {
         User user = userRepository.findByEmail(email).get(); //NoSuchElementException
         return cartRepository.save(Cart.getInstance(user));
     }
-
     //카트삭제
     public void deleteCart(Long id) {
-        cartRepository.deleteById(id); //NoSuchElementException
+        Cart cart = getCart(id);
+        cartItemRepository.deleteAllByCart(cart);
+        cartRepository.deleteById(id);
     }
-
     //단일아이템카트주문
     public Cart createCartWithSingleItem(Long id, int quantity, String email) {
         Cart newCart = createCart(email);
         Item item = itemRepository.findById(id).get();
-
         CartItem cartItem = CartItem.getInstance(quantity, item, newCart);
         cartItemRepository.save(cartItem);
-
         return newCart;
     }
+
     public Cart addItem(Long itemId, int quantity, Long cartId) {
         Cart cart = getCart(cartId);
         Item item = itemRepository.findById(itemId).get();
-
         CartItem cartItem = CartItem.getInstance(quantity, item, cart);
         cartItemRepository.save(cartItem);
-
         return cart;
     }
 }
