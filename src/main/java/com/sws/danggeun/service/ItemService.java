@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @Transactional
@@ -20,6 +21,7 @@ public class ItemService {
     private final ItemImgRepository itemImgRepository;
     private final CartItemRepository cartItemRepository;
     private final OrderItemRepository orderItemRepository;
+    private final OrderRepository orderRepository;
     //상품생성(판매)
     public Item saveItem(ItemDto itemDto, String email) { //controller에서 dto 검사,
         User user = userRepository.findByEmail(email).get();
@@ -31,17 +33,27 @@ public class ItemService {
         itemImgRepository.saveAll(newItemImgList);
         return newItem;
     }
-    //상품조회
+    //상품 조회
     public Item getItem(Long id) {
         return itemRepository.findById(id).get();
     }
-
+    //상품목록 조회
     public List<Item> getItems() { return itemRepository.findAll();}
+    //내 판매상품 조회
+    public List<Item> getMyItems(String email) {
+        User user = userRepository.findByEmail(email).get();
+        return itemRepository.findByUser(user);
+    }
     //상품 수량 차감 : 아이템수량 - 주문수량 비교
     public boolean checkAndReduce(long id, int quantity) {
         if (quantity > countItemQuantity(id)) return false;
         updateItemQuantity(id, quantity);
         return true;
+    }
+    //상품 수량 복구 : 주문취소시
+    public void restore(long id, int quantity) {
+        Item item = getItem(id);
+        item.setQuantity(item.getQuantity()+quantity);
     }
     //상품 정보 업데이트
     public Item updateItem(ItemDto itemDto) {
@@ -57,6 +69,11 @@ public class ItemService {
         Item item = getItem(id);
         itemImgRepository.deleteAllByItem(item);
         cartItemRepository.deleteAllByItem(item);
+        List<OrderItem> orderItemList = orderItemRepository.findByItem(item);
+        for(OrderItem orderItem : orderItemList) {
+            Order order = orderItem.getOrder();
+            order.setPrice(order.getPrice()-orderItem.getPrice());
+        }
         orderItemRepository.deleteAllByItem(item);
         itemRepository.deleteById(id);
     }
