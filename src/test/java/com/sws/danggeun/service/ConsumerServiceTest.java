@@ -1,6 +1,7 @@
 package com.sws.danggeun.service;
 
 import com.sws.danggeun.dto.ItemDto;
+import com.sws.danggeun.dto.OrderDto;
 import com.sws.danggeun.entity.*;
 import com.sws.danggeun.repository.CartItemRepository;
 import com.sws.danggeun.repository.CartRepository;
@@ -34,7 +35,7 @@ class ConsumerServiceTest {
         itemDto.setPrice(10000);
         itemDto.setQuantity(10);
         itemDto.setItemStatus(ItemStatus.FOR_SALE);
-        Item i = itemService.createItem(itemDto, email);
+        Item i = itemService.saveItem(itemDto, email);
 
         return i;
     }
@@ -46,15 +47,15 @@ class ConsumerServiceTest {
         consumerService.buySingleItem(item.getId(),5, "sws@naver.com");
         Item update = itemRepository.findById(item.getId()).get();
 
-        List<Order> orders = orderRepository.findAll(); // service로 이동시키기
-        List<Item> items = itemRepository.findAll();
+        List<OrderDto> orders = consumerService.viewOrderList("sws@naver.com");
+        List<ItemDto> items = consumerService.viewItemList();
         List<CartItem> cartitems = cartItemRepository.findAll();
         List<Cart> carts = cartRepository.findAll();
 
-        for(Order o : orders) {
+        for(OrderDto o : orders) {
             System.out.println(o);
         }
-        for(Item i : items) {
+        for(ItemDto i : items) {
             System.out.println(i);
         }
         for(Cart c : carts) {
