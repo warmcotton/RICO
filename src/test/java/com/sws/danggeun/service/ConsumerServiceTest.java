@@ -1,5 +1,7 @@
 package com.sws.danggeun.service;
 
+import com.sws.danggeun.dto.CartDto;
+import com.sws.danggeun.dto.CartItemDto;
 import com.sws.danggeun.dto.ItemDto;
 import com.sws.danggeun.dto.OrderDto;
 import com.sws.danggeun.entity.*;
@@ -29,11 +31,23 @@ class ConsumerServiceTest {
     CartItemRepository cartItemRepository;
     @Autowired
     CartRepository cartRepository;
+    @Autowired
+    CartService cartService;
     Item create(String email) {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("ProductA");
         itemDto.setPrice(10000);
         itemDto.setQuantity(10);
+        itemDto.setItemStatus(ItemStatus.FOR_SALE);
+        Item i = itemService.saveItem(itemDto, email);
+
+        return i;
+    }
+    Item create1(String email) {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("ProductB");
+        itemDto.setPrice(50000);
+        itemDto.setQuantity(20);
         itemDto.setItemStatus(ItemStatus.FOR_SALE);
         Item i = itemService.saveItem(itemDto, email);
 
@@ -67,5 +81,38 @@ class ConsumerServiceTest {
 
         assertAll("buy", () -> assertEquals(5,update.getQuantity())
                 );
+    }
+
+    @Test
+    void addItemsToCart() {
+        Cart cart = cartService.createCart("sws@naver.com");
+        Item item = create("sws@naver.com");
+        Item item1 = create1("sws@naver.com");
+        cartService.addItem(item.getId(),5, cart.getId());
+        cartService.addItem(item1.getId(),10, cart.getId());
+
+        List<CartDto> cartDtoList = consumerService.viewCartList("sws@naver.com");
+        cartDtoList.stream().forEach(System.out::println);
+    }
+
+    @Test
+    void buyCarts() throws Exception {
+        Cart cart = cartService.createCart("sws@naver.com");
+        Item item = create("sws@naver.com");
+        Item item1 = create1("sws@naver.com");
+        Cart cart1 = cartService.createCart("sws@naver.com");
+        cartService.addItem(item.getId(),5, cart.getId());
+        cartService.addItem(item1.getId(),10, cart.getId());
+        cartService.addItem(item.getId(),1, cart1.getId());
+        cartService.addItem(item1.getId(),1, cart1.getId());
+        List<CartDto> cartDtoList = consumerService.viewCartList("sws@naver.com");
+        cartDtoList.stream().forEach(System.out::println);
+
+        consumerService.buyCarts(cartDtoList, "sws@naver.com");
+
+        List<OrderDto> orders = consumerService.viewOrderList("sws@naver.com");
+        orders.stream().forEach(System.out::println);
+        List<CartDto> cartDtos = consumerService.viewCartList("sws@naver.com");
+        cartDtos.stream().forEach(System.out::println);
     }
 }
