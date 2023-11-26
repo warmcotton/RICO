@@ -1,4 +1,4 @@
-package com.sws.danggeun.entity;
+package com.sws.danggeun.constant;
 
 public enum OrderStatus {
     ORDER, CANCEL

@@ -1,5 +1,6 @@
 package com.sws.danggeun.service;
 
+import com.sws.danggeun.constant.ItemStatus;
 import com.sws.danggeun.entity.*;
 import com.sws.danggeun.repository.CartItemRepository;
 import com.sws.danggeun.repository.CartRepository;

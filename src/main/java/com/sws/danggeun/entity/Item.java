@@ -1,10 +1,10 @@
 package com.sws.danggeun.entity;
 
+import com.sws.danggeun.constant.ItemStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;

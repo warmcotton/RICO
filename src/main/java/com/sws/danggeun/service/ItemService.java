@@ -1,5 +1,6 @@
 package com.sws.danggeun.service;
 
+import com.sws.danggeun.constant.ItemStatus;
 import com.sws.danggeun.dto.ItemDto;
 import com.sws.danggeun.entity.*;
 import com.sws.danggeun.repository.*;
@@ -10,7 +11,6 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @Transactional

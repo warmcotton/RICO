@@ -1,5 +1,6 @@
 package com.sws.danggeun.entity;
 
+import com.sws.danggeun.constant.OrderStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;

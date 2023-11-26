@@ -1,7 +1,7 @@
 package com.sws.danggeun.service;
 
+import com.sws.danggeun.constant.ItemStatus;
 import com.sws.danggeun.dto.CartDto;
-import com.sws.danggeun.dto.CartItemDto;
 import com.sws.danggeun.dto.ItemDto;
 import com.sws.danggeun.dto.OrderDto;
 import com.sws.danggeun.entity.*;
@@ -38,7 +38,7 @@ class ConsumerServiceTest {
     CartService cartService;
     @Autowired
     OrderService orderService;
-    void createItem(String email,String name,int price,int quantity,ItemStatus itemStatus) {
+    void createItem(String email, String name, int price, int quantity, ItemStatus itemStatus) {
         ItemDto itemDto = new ItemDto();
         itemDto.setName(name);
         itemDto.setPrice(price);

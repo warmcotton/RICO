@@ -2,7 +2,7 @@ package com.sws.danggeun.dto;
 
 import com.sws.danggeun.entity.Order;
 import com.sws.danggeun.entity.OrderItem;
-import com.sws.danggeun.entity.OrderStatus;
+import com.sws.danggeun.constant.OrderStatus;
 import lombok.Getter;
 import lombok.Setter;
 

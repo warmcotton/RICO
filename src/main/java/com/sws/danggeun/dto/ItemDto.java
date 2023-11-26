@@ -1,8 +1,7 @@
 package com.sws.danggeun.dto;
 
 import com.sws.danggeun.entity.Item;
-import com.sws.danggeun.entity.ItemStatus;
-import com.sws.danggeun.entity.User;
+import com.sws.danggeun.constant.ItemStatus;
 import lombok.Getter;
 import lombok.Setter;
 
