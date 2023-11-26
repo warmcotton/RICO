@@ -1,10 +1,12 @@
 package com.sws.danggeun.service;
 
+import com.sws.danggeun.constant.OrderStatus;
 import com.sws.danggeun.dto.CartDto;
 import com.sws.danggeun.dto.CartItemDto;
 import com.sws.danggeun.dto.ItemDto;
 import com.sws.danggeun.dto.OrderDto;
 import com.sws.danggeun.entity.*;
+import com.sws.danggeun.token.TokenInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ public class ConsumerService {
     private final CartService cartService;
     private final OrderService orderService;
     private final ItemService itemService;
+    private final UserService userService;
     //단일 아이템 주문 : 수량확인 -> 카트생성 -> 주문
     public OrderDto buySingleItem(Long id, int quantity, String email) throws Exception {
         if (!itemService.checkAndReduce(id, quantity)) throw new Exception("수량 없음");
@@ -78,7 +81,7 @@ public class ConsumerService {
     //주문취소
     public void cancel(Long id) throws Exception {
         Order order = orderService.getOrder(id);
-        if(order.getStatus()==OrderStatus.CANCEL) throw new Exception("이미 취소됨");
+        if(order.getStatus()== OrderStatus.CANCEL) throw new Exception("이미 취소됨");
         List<OrderItem> orderItemList = orderService.getOrderItems(order);
         for(OrderItem orderItem : orderItemList) {
             itemService.restore(orderItem.getItem().getId(),orderItem.getCount());
