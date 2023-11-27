@@ -2,8 +2,12 @@ package com.sws.danggeun.dto;
 
 import com.sws.danggeun.entity.Item;
 import com.sws.danggeun.constant.ItemStatus;
+import com.sws.danggeun.entity.ItemImg;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter @Setter
 public class ItemDto {
@@ -12,17 +16,18 @@ public class ItemDto {
     private int price;
     private int quantity;
     private ItemStatus itemStatus;
+    private List<ItemImgDto> itemImgDtoList;
     private String user; //
 
-    public static ItemDto getDto(Item i) {
+    public static ItemDto getDto(Item i, List<ItemImg> itemImgDtoList) {
         ItemDto itemDto = new ItemDto();
         itemDto.setId(i.getId());
         itemDto.setName(i.getName());
         itemDto.setPrice(i.getPrice());
         itemDto.setQuantity(i.getQuantity());
         itemDto.setItemStatus(i.getItemStatus());
+        itemDto.setItemImgDtoList(itemImgDtoList.stream().map(ItemImgDto::getInstance).collect(Collectors.toList()));
         itemDto.setUser(i.getUser().getEmail());
-
         return itemDto;
     }
 
@@ -34,6 +39,7 @@ public class ItemDto {
                 ", price=" + price +
                 ", quantity=" + quantity +
                 ", itemStatus=" + itemStatus +
+                ", itemImgDtoList=" + itemImgDtoList +
                 ", user='" + user + '\'' +
                 '}';
     }

@@ -10,10 +10,20 @@ import javax.persistence.*;
 public class ItemImg {
     @Id @Column(name="item_img_id") @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String imgName; //이미지 파일명
-    private String oriImgName; //원본 이미지 파일명
-    private String imgUrl; //이미지 조회 경로
-    private String repimgYn; //대표 이미지 여부
+    private String imgName; 
+    private String oriImgName; 
+    private String imgUrl; 
+    private String repimgYn; 
     @JoinColumn(name = "item_id") @ManyToOne(fetch = FetchType.LAZY)
     private Item item;
+
+    public static ItemImg getInstance(String imgName, String oriImgName, String imgUrl, String repimgYn, Item item) {
+        ItemImg itemImg = new ItemImg();
+        itemImg.imgName = imgName;
+        itemImg.oriImgName = oriImgName;
+        itemImg.imgUrl = imgUrl;
+        itemImg.repimgYn = repimgYn;
+        itemImg.item = item;
+        return itemImg;
+    }
 }

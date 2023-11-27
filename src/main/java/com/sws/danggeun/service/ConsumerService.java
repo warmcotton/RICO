@@ -6,7 +6,6 @@ import com.sws.danggeun.dto.CartItemDto;
 import com.sws.danggeun.dto.ItemDto;
 import com.sws.danggeun.dto.OrderDto;
 import com.sws.danggeun.entity.*;
-import com.sws.danggeun.token.TokenInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -62,7 +61,8 @@ public class ConsumerService {
         List<Item> itemList = itemService.getItems();
         List<ItemDto> itemDtoList = new ArrayList<>();
         for(Item i : itemList) {
-            ItemDto newItemDto = ItemDto.getDto(i);
+            List<ItemImg> itemImgList = itemService.getItemImgs(i);
+            ItemDto newItemDto = ItemDto.getDto(i, itemImgList);
             itemDtoList.add(newItemDto);
         }
         return itemDtoList;
