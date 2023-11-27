@@ -29,7 +29,7 @@ public class ItemService {
     private final OrderRepository orderRepository;
     @Value("${img.location}") private String imgLocation;
     //상품생성(판매)
-    public Item saveItem(ItemDto itemDto, List<MultipartFile> imgList, String email) throws IOException { //controller에서 dto 검사,
+    public ItemDto saveItem(ItemDto itemDto, List<MultipartFile> imgList, String email) throws IOException { //controller에서 dto 검사,
         User user = userRepository.findByEmail(email).get();
         Item newItem = Item.getInstance(itemDto.getName(),itemDto.getPrice(),
                 itemDto.getQuantity(),itemDto.getItemStatus(),user);
@@ -38,7 +38,7 @@ public class ItemService {
             List<ItemImg> newItemImgList = saveImage(item, imgList); //FileService - 멀티파일 리스트 받아서 List<ItemImg> 리턴
             itemImgRepository.saveAll(newItemImgList);
         }
-        return item;
+        return getItemDto(item.getId());
     }
     //상품 조회
     public Item getItem(Long id) {
@@ -50,6 +50,11 @@ public class ItemService {
     public List<Item> getMyItems(String email) {
         User user = userRepository.findByEmail(email).get();
         return itemRepository.findByUser(user);
+    }
+    public ItemDto getItemDto(Long id) {
+        Item item = getItem(id);
+        List<ItemImg> itemImgList = getItemImgs(item);
+        return ItemDto.getDto(item,itemImgList);
     }
     //상품 수량 차감 : 아이템수량 - 주문수량 비교
     public boolean checkAndReduce(long id, int quantity) {
@@ -117,7 +122,7 @@ public class ItemService {
         assert oriImgName != null;
         String extension = oriImgName.substring(oriImgName.lastIndexOf("."));
         String savedFileName = uuid + extension;
-        String imgUrl = "/images/item/"+savedFileName;
+        String imgUrl = "/images/dang-geun/"+savedFileName;
         FileOutputStream fos = new FileOutputStream(imgLocation+"/"+savedFileName);
         fos.write(file.getBytes());
         fos.close();

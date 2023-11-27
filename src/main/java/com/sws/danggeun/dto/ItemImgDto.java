@@ -1,7 +1,10 @@
 package com.sws.danggeun.dto;
 
 import com.sws.danggeun.entity.ItemImg;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter @Setter
 public class ItemImgDto {
     private Long id;
     private String imgName;
