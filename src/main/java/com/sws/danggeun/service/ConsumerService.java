@@ -54,7 +54,7 @@ public class ConsumerService {
         return cartDtoList;
     }
 
-    public List<ItemDto> viewItemList() {
+    public List<ItemDto> getItemDtoList() {
         List<Item> itemList = itemService.getItems();
         List<ItemDto> itemDtoList = new ArrayList<>();
         for(Item i : itemList) {
@@ -65,7 +65,7 @@ public class ConsumerService {
         return itemDtoList;
     }
 
-    public List<OrderDto> viewOrderList(String email) {
+    public List<OrderDto> getOrderDtoList(String email) {
         List<Order> orderList = orderService.getOrders(email);
         List<OrderDto> orderDtoList = new ArrayList<>();
         for(Order o : orderList) {

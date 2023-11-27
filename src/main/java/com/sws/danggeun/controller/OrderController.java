@@ -16,15 +16,15 @@ public class OrderController {
     private final ConsumerService consumerService;
 
     @ResponseBody
-    @GetMapping ("/order/{itemId}")
-    public OrderDto buy(@PathVariable Long itemId, @RequestParam int quantity, Authentication authentication) throws Exception {
+    @GetMapping ("/item/{itemId}/order")
+    public OrderDto orderItem(@PathVariable Long itemId, @RequestParam int quantity, Authentication authentication) throws Exception {
         return consumerService.buySingleItem(itemId, quantity, authentication.getName());
     }
 
     @ResponseBody
     @GetMapping("/orders")
-    public List<OrderDto> orders(Authentication authentication) {
-        return consumerService.viewOrderList(authentication.getName());
+    public List<OrderDto> getOrders(Authentication authentication) {
+        return consumerService.getOrderDtoList(authentication.getName());
     }
 
     @GetMapping("/order/{orderId}/cancel")

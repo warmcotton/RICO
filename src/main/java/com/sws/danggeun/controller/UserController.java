@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -36,5 +37,17 @@ public class UserController {
     @PutMapping("/user")
     public UserDto update(@RequestBody UserDto userDto, Authentication authentication) throws Exception {
         return userService.update(userDto, authentication.getName());
+    }
+
+    @ResponseBody
+    @GetMapping("/user/{userId}")
+    public UserDto user(@PathVariable String userId) {
+        return userService.getUserDto(userId);
+    }
+
+    @ResponseBody
+    @GetMapping("/users")
+    public List<UserDto> getUsers() {
+        return userService.getUserDtoList();
     }
 }

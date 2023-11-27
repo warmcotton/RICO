@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByUser(User user);
+
+    List<Item> findByNameContaining(String name);
 }

@@ -15,7 +15,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -26,13 +28,11 @@ public class ItemService {
     private final ItemImgRepository itemImgRepository;
     private final CartItemRepository cartItemRepository;
     private final OrderItemRepository orderItemRepository;
-    private final OrderRepository orderRepository;
     @Value("${img.location}") private String imgLocation;
     //상품생성(판매)
     public ItemDto saveItem(ItemDto itemDto, List<MultipartFile> imgList, String email) throws IOException { //controller에서 dto 검사,
         User user = userRepository.findByEmail(email).get();
-        Item newItem = Item.getInstance(itemDto.getName(),itemDto.getPrice(),
-                itemDto.getQuantity(),itemDto.getItemStatus(),user);
+        Item newItem = Item.getInstance(itemDto.getName(),itemDto.getPrice(), itemDto.getQuantity(),itemDto.getItemStatus(), user);
         Item item = itemRepository.save(newItem);
         if(imgList.size() > 0) {
             List<ItemImg> newItemImgList = saveImage(item, imgList); //FileService - 멀티파일 리스트 받아서 List<ItemImg> 리턴
@@ -41,43 +41,51 @@ public class ItemService {
         return getItemDto(item.getId());
     }
     //상품 조회
-    public Item getItem(Long id) {
+    private Item getItem(Long id) {
         return itemRepository.findById(id).get();
     }
     //상품목록 조회
-    public List<Item> getItems() { return itemRepository.findAll();}
+    protected List<Item> getItems() { return itemRepository.findAll();}
     //내 판매상품 조회
-    public List<Item> getMyItems(String email) {
+    public List<ItemDto> getMyItems(Long userId, String email) throws Exception {
+        if(!checkUser(userId, email)) throw new Exception("상품 접근 권한 없음");
         User user = userRepository.findByEmail(email).get();
-        return itemRepository.findByUser(user);
+        return itemRepository.findByUser(user).stream()
+                .map(item -> getItemDto(item.getId())).collect(Collectors.toList());
     }
     public ItemDto getItemDto(Long id) {
         Item item = getItem(id);
         List<ItemImg> itemImgList = getItemImgs(item);
         return ItemDto.getDto(item,itemImgList);
     }
+    public List<ItemDto> searchItemDto(String name) {
+        return itemRepository.findByNameContaining(name).stream()
+                .map(item -> getItemDto(item.getId())).collect(Collectors.toList());
+    }
     //상품 수량 차감 : 아이템수량 - 주문수량 비교
-    public boolean checkAndReduce(long id, int quantity) {
+    protected boolean checkAndReduce(long id, int quantity) {
         if (quantity > countItemQuantity(id)) return false;
         updateItemQuantity(id, quantity);
         return true;
     }
     //상품 수량 복구 : 주문취소시
-    public void restore(long id, int quantity) {
+    protected void restore(long id, int quantity) {
         Item item = getItem(id);
         item.setQuantity(item.getQuantity()+quantity);
     }
     //상품 정보 업데이트
-    public Item updateItem(ItemDto itemDto) {
-        Item item = getItem(itemDto.getId());
+    public ItemDto updateItem(Long id, ItemDto itemDto, List<MultipartFile> imgList, String email) throws Exception {
+        if(!checkUser(id, email)) throw new Exception("상품 수정 권한 없음");
+        Item item = getItem(id);
         item.setName(itemDto.getName());
         item.setPrice(itemDto.getPrice());
         item.setQuantity(itemDto.getQuantity());
         item.setItemStatus(itemDto.getItemStatus());
-        return item;
+        return getItemDto(item.getId());
     }
     //상품 삭제
-    public void deleteItem(long id) {
+    public void deleteItem(long id, String email) throws Exception {
+        if(!checkUser(id, email)) throw new Exception("상품 삭제 권한 없음");
         Item item = getItem(id);
         itemImgRepository.deleteAllByItem(item);
         cartItemRepository.deleteAllByItem(item);
@@ -131,5 +139,9 @@ public class ItemService {
 
     public List<ItemImg> getItemImgs(Item i) {
         return itemImgRepository.findByItem(i);
+    }
+
+    private boolean checkUser(Long id, String email) {
+        return email.equals(getItem(id).getUser().getEmail());
     }
 }
