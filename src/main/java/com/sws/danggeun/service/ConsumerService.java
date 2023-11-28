@@ -3,6 +3,10 @@ package com.sws.danggeun.service;
 import com.sws.danggeun.constant.OrderStatus;
 import com.sws.danggeun.dto.*;
 import com.sws.danggeun.entity.*;
+import com.sws.danggeun.exception.CustomException;
+import com.sws.danggeun.exception.ItemException;
+import com.sws.danggeun.exception.OrderException;
+import com.sws.danggeun.exception.UserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +23,8 @@ public class ConsumerService {
     private final ItemService itemService;
     private final UserService userService;
     //단일 아이템 주문 : 수량확인 -> 카트생성 -> 주문
-    public OrderDto buySingleItem(Long id, int quantity, String email) throws Exception {
-        if (!itemService.checkAndReduce(id, quantity)) throw new Exception("수량 없음");
+    public OrderDto orderSingleItem(Long id, int quantity, String email) throws CustomException {
+        if (!itemService.checkAndReduce(id, quantity)) throw new ItemException("수량 없음");
         List<Cart> cart = new ArrayList<>();
         Cart ct = cartService.createCartWithSingleItem(id, quantity, email); //createCart x
         cart.add(ct);
@@ -29,11 +33,11 @@ public class ConsumerService {
         return OrderDto.getInstance(order, orderItemList);
     }
     //복수 카트 주문
-    public OrderDto buyCarts(List<CartDto> cartDtoList, String email) throws Exception{
+    public OrderDto orderCarts(List<CartDto> cartDtoList, String email) throws CustomException{
         List<Cart> cartList = new ArrayList<>();
         for (CartDto cartDto : cartDtoList) {
             for(CartItemDto cartItemDto : cartDto.getCartItemDto()) {
-                if (!itemService.checkAndReduce(cartItemDto.getItemId(),cartItemDto.getCount())) throw new Exception("수량 없음");
+                if (!itemService.checkAndReduce(cartItemDto.getItemId(),cartItemDto.getCount())) throw new ItemException("수량 없음");
             }
             Cart cart = cartService.getCart(cartDto.getId());
             cartList.add(cart);
@@ -41,17 +45,6 @@ public class ConsumerService {
         Order order = orderService.order(cartList, email);
         List<OrderItem> orderItemList = orderService.getOrderItems(order);
         return OrderDto.getInstance(order, orderItemList);
-    }
-
-    public List<CartDto> viewCartList(String email) {
-        List<Cart> cartList = cartService.getCarts(email);
-        List<CartDto> cartDtoList = new ArrayList<>();
-        for(Cart c : cartList) {
-            List<CartItem> cartItemList = cartService.getCartItems(c);
-            CartDto newCartDto = CartDto.getInstance(c, cartItemList);
-            cartDtoList.add(newCartDto);
-        }
-        return cartDtoList;
     }
 
     public List<ItemDto> getItemDtoList() {
@@ -76,9 +69,11 @@ public class ConsumerService {
         return orderDtoList;
     }
     //주문취소
-    public void cancel(Long id) throws Exception {
+    public void cancel(Long id, String email) throws CustomException {
+        if(!orderService.checkUser(id, email)) throw new UserException("접근 권한 없음");
         Order order = orderService.getOrder(id);
-        if(order.getStatus()== OrderStatus.CANCEL) throw new Exception("이미 취소됨");
+        if(order.getStatus()== OrderStatus.CANCEL) throw new OrderException("이미 취소됨");
+        else if (order.getStatus() == OrderStatus.COMPLETE) throw new OrderException("배송 완료됨");
         List<OrderItem> orderItemList = orderService.getOrderItems(order);
         for(OrderItem orderItem : orderItemList) {
             itemService.restore(orderItem.getItem().getId(),orderItem.getCount());

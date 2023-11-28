@@ -1,6 +1,8 @@
 package com.sws.danggeun.controller;
 
+import com.sws.danggeun.dto.CartDto;
 import com.sws.danggeun.dto.OrderDto;
+import com.sws.danggeun.exception.CustomException;
 import com.sws.danggeun.service.ConsumerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +19,13 @@ public class OrderController {
 
     @ResponseBody
     @GetMapping ("/item/{itemId}/order")
-    public OrderDto orderItem(@PathVariable Long itemId, @RequestParam int quantity, Authentication authentication) throws Exception {
-        return consumerService.buySingleItem(itemId, quantity, authentication.getName());
+    public OrderDto orderItem(@PathVariable Long itemId, @RequestParam int quantity, Authentication authentication) throws CustomException {
+        return consumerService.orderSingleItem(itemId, quantity, authentication.getName());
+    }
+    @ResponseBody
+    @PostMapping("/cart/order")
+    public OrderDto orderCart(@RequestBody List<CartDto> cartDtoList, Authentication authentication) throws CustomException {
+        return consumerService.orderCarts(cartDtoList, authentication.getName());
     }
 
     @ResponseBody
@@ -28,8 +35,8 @@ public class OrderController {
     }
 
     @GetMapping("/order/{orderId}/cancel")
-    public ResponseEntity<?> cancel(@PathVariable Long orderId, Authentication authentication) throws Exception {
-        consumerService.cancel(orderId);
+    public ResponseEntity<?> cancel(@PathVariable Long orderId, Authentication authentication) throws CustomException {
+        consumerService.cancel(orderId, authentication.getName());
         return ResponseEntity.ok().build();
     }
 }
