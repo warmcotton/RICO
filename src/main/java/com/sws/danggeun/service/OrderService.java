@@ -4,9 +4,14 @@ import com.sws.danggeun.constant.OrderStatus;
 import com.sws.danggeun.entity.*;
 import com.sws.danggeun.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 @Service
 @Transactional
@@ -59,5 +64,18 @@ public class OrderService {
     public List<OrderItem> getOrderItems(Order order) {
         List<OrderItem> orderItemList = orderItemRepository.findByOrder(order);
         return orderItemList;
+    }
+
+    public boolean checkUser(Long id, String email) {
+        return email.equals(getOrder(id).getUser().getEmail());
+    }
+    //12시간 후 배송완료
+    @EventListener
+    public void updateOrderStatus(ContextRefreshedEvent event) {
+        List<Order> orderList = orderRepository.findByStatus(OrderStatus.ORDER);
+        for(Order order : orderList) {
+            long second = Duration.between(order.getOrderDate(), LocalDateTime.now()).getSeconds();
+            if (second > 60 * 60 * 12) order.setStatus(OrderStatus.COMPLETE);
+        }
     }
 }
