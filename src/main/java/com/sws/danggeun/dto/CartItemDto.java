@@ -4,11 +4,20 @@ import com.sws.danggeun.entity.CartItem;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 @Getter @Setter
 public class CartItemDto {
+    @NotNull
+    @Min(1)
     private Long id;
+    @NotNull
+    @Min(1)
     private int count;
     private int price;
+    @NotNull
+    @Min(1)
     private Long itemId;
     private String itemName;
 

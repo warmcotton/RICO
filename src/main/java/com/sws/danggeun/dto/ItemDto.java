@@ -6,15 +6,24 @@ import com.sws.danggeun.entity.ItemImg;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter @Setter
 public class ItemDto {
     private Long id;
+    @NotEmpty
     private String name;
+    @NotNull
+    @Min(1000)
     private int price;
+    @NotNull
+    @Min(1)
     private int quantity;
+    @NotNull
     private ItemStatus itemStatus;
     private List<ItemImgDto> itemImgDtoList;
     private String user; //

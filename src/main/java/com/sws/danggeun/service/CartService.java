@@ -56,7 +56,7 @@ public class CartService {
     }
     //빈 카트생성
     private Cart createCart(String email) {
-        User user = userRepository.findByEmail(email).get(); //NoSuchElementException
+        User user = userRepository.findByEmail(email).get();
         return cartRepository.save(Cart.getInstance(user));
     }
 
@@ -65,7 +65,7 @@ public class CartService {
     }
     //카트삭제
     public void deleteCart(Long id, String email) throws CustomException {
-        if(!checkUser(id, email)) throw new CartException("카트 삭제 권한 없음");
+        if(!checkUser(id, email)) throw new CartException("카트 접근 권한 없음");
         Cart cart = getCart(id);
         cartItemRepository.deleteAllByCart(cart);
         cartRepository.deleteById(id);

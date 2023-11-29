@@ -1,6 +1,7 @@
 package com.sws.danggeun.controller;
 
 import com.sws.danggeun.dto.UserDto;
+import com.sws.danggeun.exception.CustomException;
 import com.sws.danggeun.service.UserService;
 import com.sws.danggeun.token.TokenInfo;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,31 +20,36 @@ public class UserController {
 
     @ResponseBody
     @PostMapping("/login")
-    public TokenInfo login(@RequestBody HashMap<String, String> map) throws Exception {
+    public TokenInfo login(@RequestBody HashMap<String, String> map) throws CustomException {
+        if(map.get("email")==null || map.get("password")==null || map.get("email").isEmpty() || map.get("password").isEmpty()) throw new IllegalArgumentException("Invalid Arguments");
         return userService.login(map.get("email"), map.get("password"));
     }
+
     @ResponseBody
     @PostMapping("/register")
-    public UserDto register(@RequestBody HashMap<String, String> map) throws Exception {
+    public UserDto register(@RequestBody HashMap<String, String> map) throws CustomException {
+        if(map.get("email")==null || map.get("password")==null ||  map.get("name")==null || map.get("email").isEmpty()||
+                map.get("password").isEmpty() || map.get("name").isEmpty()  ) throw new IllegalArgumentException("Invalid Arguments");
         return userService.registerNewUser(map.get("email"), map.get("password"), map.get("name"));
     }
 
     @ResponseBody
     @GetMapping("/user")
     public UserDto user(Authentication authentication) {
-        return userService.getUserDto(authentication.getName());
+        return userService.getUserDtoByEmail(authentication.getName());
     }
 
     @ResponseBody
     @PutMapping("/user")
-    public UserDto update(@RequestBody UserDto userDto, Authentication authentication) throws Exception {
+    public UserDto update(@RequestBody @Valid UserDto userDto, Authentication authentication) throws CustomException {
         return userService.update(userDto, authentication.getName());
     }
 
     @ResponseBody
     @GetMapping("/user/{userId}")
-    public UserDto user(@PathVariable String userId) {
-        return userService.getUserDto(userId);
+    public UserDto user(@PathVariable Long userId) {
+        if(userId<1) throw new IllegalArgumentException("Invalid Arguments");
+        return userService.getUserDtoById(userId);
     }
 
     @ResponseBody
@@ -50,4 +57,6 @@ public class UserController {
     public List<UserDto> getUsers() {
         return userService.getUserDtoList();
     }
+
+    //deleteUsers
 }

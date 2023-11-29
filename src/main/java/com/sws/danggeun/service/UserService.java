@@ -2,6 +2,8 @@ package com.sws.danggeun.service;
 
 import com.sws.danggeun.dto.UserDto;
 import com.sws.danggeun.entity.User;
+import com.sws.danggeun.exception.CustomException;
+import com.sws.danggeun.exception.UserException;
 import com.sws.danggeun.repository.UserRepository;
 import com.sws.danggeun.token.JwtTokenProvider;
 import com.sws.danggeun.token.TokenInfo;
@@ -30,8 +32,8 @@ public class UserService implements UserDetailsService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     //회원가입
-    public UserDto registerNewUser(String email, String password, String name) throws Exception {
-        if (validateDuplicateEmail(email)) throw new Exception("이메일 중복");
+    public UserDto registerNewUser(String email, String password, String name) throws CustomException {
+        if (validateDuplicateEmail(email)) throw new UserException("이메일 중복");
         User user = userRepository.save(User.getInstance(email, password, name, passwordEncoder));
         return UserDto.getInstance(user);
     }
@@ -47,13 +49,13 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(()->new UsernameNotFoundException("유저 존재 x"));
     }
     //로그인
-    public TokenInfo login(String email, String password) throws Exception {
+    public TokenInfo login(String email, String password) throws CustomException {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(email, password);
         try {
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(token);
             return jwtTokenProvider.generateToken(authentication);
         } catch (AuthenticationException e) {
-            throw new Exception(e.getMessage());
+            throw new UserException("인증 오류");
         }
     }
     //회원조회
@@ -61,17 +63,21 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email).get();
     }
 
-    public UserDto getUserDto(String email) {
+    public UserDto getUserDtoByEmail(String email) {
         return UserDto.getInstance(getUser(email));
     }
     
     public List<UserDto> getUserDtoList() {
-        return userRepository.findAll().stream().map(user -> getUserDto(user.getEmail())).collect(Collectors.toList());
+        return userRepository.findAll().stream().map(user -> getUserDtoByEmail(user.getEmail())).collect(Collectors.toList());
     }
     //회원정보수정
-    public UserDto update(UserDto userDto, String email) throws Exception {
+    public UserDto update(UserDto userDto, String email) throws CustomException {
         User user = getUser(email);
-        if (validateDuplicateEmail(userDto.getEmail())) throw new Exception("이메일 중복");
+        if (validateDuplicateEmail(userDto.getEmail())) throw new UserException("이메일 중복");
         return UserDto.getInstance(user.setInstance(userDto, passwordEncoder));
+    }
+
+    public UserDto getUserDtoById(Long userId) {
+        return UserDto.getInstance(userRepository.findById(userId).get());
     }
 }

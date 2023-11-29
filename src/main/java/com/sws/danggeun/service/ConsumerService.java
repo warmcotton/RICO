@@ -6,7 +6,6 @@ import com.sws.danggeun.entity.*;
 import com.sws.danggeun.exception.CustomException;
 import com.sws.danggeun.exception.ItemException;
 import com.sws.danggeun.exception.OrderException;
-import com.sws.danggeun.exception.UserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,6 @@ public class ConsumerService {
     private final CartService cartService;
     private final OrderService orderService;
     private final ItemService itemService;
-    private final UserService userService;
     //단일 아이템 주문 : 수량확인 -> 카트생성 -> 주문
     public OrderDto orderSingleItem(Long id, int quantity, String email) throws CustomException {
         if (!itemService.checkAndReduce(id, quantity)) throw new ItemException("수량 없음");
@@ -70,7 +68,7 @@ public class ConsumerService {
     }
     //주문취소
     public void cancel(Long id, String email) throws CustomException {
-        if(!orderService.checkUser(id, email)) throw new UserException("접근 권한 없음");
+        if(!orderService.checkUser(id, email)) throw new OrderException("접근 권한 없음");
         Order order = orderService.getOrder(id);
         if(order.getStatus()== OrderStatus.CANCEL) throw new OrderException("이미 취소됨");
         else if (order.getStatus() == OrderStatus.COMPLETE) throw new OrderException("배송 완료됨");
