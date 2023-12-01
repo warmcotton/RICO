@@ -25,6 +25,7 @@ public class SecurtyConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/login").permitAll()
+                .antMatchers("/refresh").permitAll()
                 .antMatchers("/register").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("/").permitAll()
