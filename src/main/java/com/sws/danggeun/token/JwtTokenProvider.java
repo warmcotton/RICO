@@ -26,30 +26,30 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
     private final Key key;
+    @Value("${access.expires.time}")
+    private long ACCESS_EXPIRES_TIME;
+    @Value("${refresh.expires.time}")
+    private long REFRESH_EXPIRES_TIME;
+
     public JwtTokenProvider(@Value("${jwt.secret}") String secret) {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
-    public TokenInfo generateToken(Authentication authentication) { //First Login
-        // 권한 가져오기
+    public TokenInfo generateToken(Authentication authentication) { 
+
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-
         long now = (new Date()).getTime();
-        // Access Token 생성
-        Date accessTokenExpiresIn = new Date(now + 1000*60);
-
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
-                .setExpiration(accessTokenExpiresIn)
+                .setExpiration(new Date(now + ACCESS_EXPIRES_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        // Refresh Token 생성
         String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + 1000*60*10))
+                .setExpiration(new Date(now + REFRESH_EXPIRES_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 

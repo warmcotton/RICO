@@ -5,6 +5,7 @@ import com.sws.danggeun.exception.CustomException;
 import com.sws.danggeun.service.UserService;
 import com.sws.danggeun.token.TokenInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -27,11 +28,19 @@ public class UserController {
     }
 
     @ResponseBody
-    @PostMapping("/refresh")
+    @GetMapping("/refresh")
     public TokenInfo refresh(@RequestHeader("Authorization") String token) throws CustomException {
         token = getToken(token);
         if(token == null) throw new IllegalArgumentException("Invalid token");
         return userService.refresh(token);
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token, Authentication authentication) {
+        token = getToken(token);
+        if(token == null) throw new IllegalArgumentException("Invalid token");
+        userService.logout(token, authentication.getName());
+        return ResponseEntity.status(200).build();
     }
 
     @ResponseBody

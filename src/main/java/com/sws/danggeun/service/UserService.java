@@ -1,6 +1,5 @@
 package com.sws.danggeun.service;
 
-import antlr.Token;
 import com.sws.danggeun.constant.Role;
 import com.sws.danggeun.dto.UserDto;
 import com.sws.danggeun.entity.User;
@@ -11,6 +10,7 @@ import com.sws.danggeun.token.JwtTokenProvider;
 import com.sws.danggeun.token.TokenInfo;
 import com.sws.danggeun.token.TokenUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -36,6 +36,10 @@ public class UserService implements UserDetailsService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final RedisTemplate<String, String> redisTemplate;
+    @Value("${access.expires.time}")
+    private long ACCESS_EXPIRES_TIME;
+    @Value("${refresh.expires.time}")
+    private long REFRESH_EXPIRES_TIME;
     //회원가입
     public UserDto registerNewUser(String email, String password, String name) throws CustomException {
         if (validateDuplicateEmail(email)) throw new UserException("이메일 중복");
@@ -59,11 +63,15 @@ public class UserService implements UserDetailsService {
         try {
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(token);
             TokenInfo authenticated = jwtTokenProvider.generateToken(authentication);
-            redisTemplate.opsForValue().set("RT:"+authenticated.getRefreshToken(),email,1000*60*10, TimeUnit.MILLISECONDS);
+            redisTemplate.opsForValue().set("RT:"+authenticated.getRefreshToken(),email,REFRESH_EXPIRES_TIME, TimeUnit.MILLISECONDS);
             return authenticated;
         } catch (AuthenticationException e) {
             throw new UserException("인증 오류");
         }
+    }
+
+    public void logout(String token, String email) {
+        redisTemplate.opsForValue().set("LOGOUT:"+token,email,ACCESS_EXPIRES_TIME,TimeUnit.MILLISECONDS);
     }
     public TokenInfo refresh(String token) throws CustomException {
         if(redisTemplate.opsForValue().get("RT:"+token)==null) throw new UserException("not valid refresh token");
@@ -72,7 +80,7 @@ public class UserService implements UserDetailsService {
         Role userRole = getUser(email).getRole();
         Authentication authentication = jwtTokenProvider.getRefreshAuthentication(email, userRole);
         TokenInfo authenticated = jwtTokenProvider.generateToken(authentication);
-        redisTemplate.opsForValue().set("RT:"+authenticated.getRefreshToken(),email,1000*60*10, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set("RT:"+authenticated.getRefreshToken(),email,REFRESH_EXPIRES_TIME, TimeUnit.MILLISECONDS);
         return authenticated;
     }
     //회원조회
