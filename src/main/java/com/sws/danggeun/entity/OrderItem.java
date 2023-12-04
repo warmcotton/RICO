@@ -1,9 +1,13 @@
 package com.sws.danggeun.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "order_item")
+@Getter @Setter
 public class OrderItem {
     @Id @Column(name = "order_item_id") @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -15,4 +19,13 @@ public class OrderItem {
     private Item item;
     @JoinColumn(name = "order_id") @ManyToOne(fetch = FetchType.LAZY)
     private Order order;
+
+    public static OrderItem getInstance(Item item, Order order, int count, int price) {
+        OrderItem newOrderItem = new OrderItem();
+        newOrderItem.setItem(item);
+        newOrderItem.setOrder(order);
+        newOrderItem.setCount(count);
+        newOrderItem.setPrice(price);
+        return newOrderItem;
+    }
 }
