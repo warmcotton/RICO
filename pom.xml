@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.sws</groupId>
-	<artifactId>dang-geun</artifactId>
+	<artifactId>RICO</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>dang-geun</name>
-	<description>dang-geun</description>
+	<name>rico</name>
+	<description>Ecommerce Project</description>
 	<properties>
 		<java.version>11</java.version>
 	</properties>
