@@ -41,7 +41,7 @@ public class ItemController {
 
     @ResponseBody
     @PostMapping("/item")
-    public ItemDto saveItem(@RequestPart @Valid ItemDto itemDto, @RequestPart List<MultipartFile> itemFileList, Authentication authentication) throws CustomException {
+    public ItemDto saveItem(@RequestPart List<MultipartFile> itemFileList, @RequestPart @Valid ItemDto itemDto, Authentication authentication) throws CustomException {
         return itemService.saveItem(itemDto, itemFileList, authentication.getName());
     }
 
@@ -61,9 +61,15 @@ public class ItemController {
     }
 
     @ResponseBody
+    @GetMapping("/user/myitems")
+    public List<ItemDto> getMyItems(Authentication authentication) throws CustomException {
+        return itemService.getMyItems(authentication.getName());
+    }
+
+    @ResponseBody
     @GetMapping("/user/{userId}/items")
-    public List<ItemDto> getMyItems(@PathVariable Long userId, Authentication authentication) throws CustomException {
+    public List<ItemDto> getUserItems(@PathVariable Long userId) throws CustomException {
         if(userId<1) throw new IllegalArgumentException("Invalid Arguments");
-        return itemService.getMyItems(userId, authentication.getName());
+        return itemService.getUserItems(userId);
     }
 }
