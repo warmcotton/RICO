@@ -63,6 +63,7 @@ public class ItemService {
         User user = userRepository.findById(userId).get();
         return itemRepository.findByUser(user).stream()
                 .map(item -> getItemDto(item.getId())).collect(Collectors.toList());
+        
     }
     public ItemDto getItemDto(Long id) {
         Item item = getItem(id);
