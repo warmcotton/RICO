@@ -27,6 +27,7 @@ public class SecurtyConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
+                .antMatchers("/items").permitAll()
                 .antMatchers("/login").permitAll()
                 .antMatchers("/refresh").permitAll()
                 .antMatchers("/register").permitAll()
