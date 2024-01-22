@@ -45,27 +45,6 @@ public class ConsumerService {
         return OrderDto.getInstance(order, orderItemList);
     }
 
-    public List<ItemDto> getItemDtoList() {
-        List<Item> itemList = itemService.getItems();
-        List<ItemDto> itemDtoList = new ArrayList<>();
-        for(Item i : itemList) {
-            List<ItemImg> itemImgList = itemService.getItemImgs(i);
-            ItemDto newItemDto = ItemDto.getDto(i, itemImgList);
-            itemDtoList.add(newItemDto);
-        }
-        return itemDtoList;
-    }
-
-    public List<OrderDto> getOrderDtoList(String email) {
-        List<Order> orderList = orderService.getOrders(email);
-        List<OrderDto> orderDtoList = new ArrayList<>();
-        for(Order o : orderList) {
-            List<OrderItem> orderItemList = orderService.getOrderItems(o);
-            OrderDto orderDto = OrderDto.getInstance(o, orderItemList);
-            orderDtoList.add(orderDto);
-        }
-        return orderDtoList;
-    }
     //주문취소
     public void cancel(Long id, String email) throws CustomException {
         if(!orderService.checkUser(id, email)) throw new OrderException("접근 권한 없음");

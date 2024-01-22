@@ -4,6 +4,7 @@ import com.sws.rico.dto.CartContainerDto;
 import com.sws.rico.dto.OrderDto;
 import com.sws.rico.exception.CustomException;
 import com.sws.rico.service.ConsumerService;
+import com.sws.rico.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
     private final ConsumerService consumerService;
+    private final OrderService orderService;
 
     @ResponseBody
     @GetMapping ("/item/{itemId}/order")
@@ -34,7 +36,7 @@ public class OrderController {
     @ResponseBody
     @GetMapping("/orders")
     public List<OrderDto> getOrders(Authentication authentication) {
-        return consumerService.getOrderDtoList(authentication.getName());
+        return orderService.getOrderDtoList(authentication.getName());
     }
 
     @GetMapping("/order/{orderId}/cancel")

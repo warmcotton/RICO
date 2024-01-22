@@ -1,6 +1,7 @@
 package com.sws.rico.service;
 
 import com.sws.rico.constant.OrderStatus;
+import com.sws.rico.dto.OrderDto;
 import com.sws.rico.entity.*;
 import com.sws.rico.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 @Service
 @Transactional
@@ -47,6 +49,7 @@ public class OrderService {
         newOrder.setPrice(total);
         return newOrder;
     }
+
     //주문취소 : 수량업데이트
     public void deleteOrder(Long id) throws Exception {
         Order order = getOrder(id);
@@ -55,7 +58,7 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 
-    public List<Order> getOrders(String email) {
+    private List<Order> getOrders(String email) {
         User user = userRepository.findByEmail(email).get();
         return orderRepository.findByUser(user);
     }
@@ -76,5 +79,16 @@ public class OrderService {
             long second = Duration.between(order.getOrderDate(), LocalDateTime.now()).getSeconds();
             if (second > 60 * 60 * 12) order.setStatus(OrderStatus.COMPLETE);
         }
+    }
+
+    public List<OrderDto> getOrderDtoList(String email) {
+        List<Order> orderList = getOrders(email);
+        List<OrderDto> orderDtoList = new ArrayList<>();
+        for(Order o : orderList) {
+            List<OrderItem> orderItemList = getOrderItems(o);
+            OrderDto orderDto = OrderDto.getInstance(o, orderItemList);
+            orderDtoList.add(orderDto);
+        }
+        return orderDtoList;
     }
 }
