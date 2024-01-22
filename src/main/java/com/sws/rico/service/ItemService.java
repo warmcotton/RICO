@@ -30,6 +30,7 @@ public class ItemService {
     private final ItemImgRepository itemImgRepository;
     private final CartItemRepository cartItemRepository;
     private final OrderItemRepository orderItemRepository;
+    private final DeletedItemRepository deletedItemRepository;
     @Value("${img.location}") private String imgLocation;
     //상품생성(판매)
     public ItemDto saveItem(ItemDto itemDto, List<MultipartFile> imgList, String email) throws CustomException {
@@ -52,8 +53,7 @@ public class ItemService {
     //상품목록 조회
     protected List<Item> getItems() { return itemRepository.findAll();} //protected : ConsumerService 한정
     //내 판매상품 조회
-    public List<ItemDto> getMyItems(Long userId, String email) throws CustomException {
-        if(!checkUser(userId, email)) throw new ItemException("상품 접근 권한 없음");
+    public List<ItemDto> getMyItems(String email) {
         User user = userRepository.findByEmail(email).get();
         return itemRepository.findByUser(user).stream()
                 .map(item -> getItemDto(item.getId())).collect(Collectors.toList());
@@ -63,7 +63,7 @@ public class ItemService {
         User user = userRepository.findById(userId).get();
         return itemRepository.findByUser(user).stream()
                 .map(item -> getItemDto(item.getId())).collect(Collectors.toList());
-        
+
     }
     public ItemDto getItemDto(Long id) {
         Item item = getItem(id);
@@ -94,6 +94,8 @@ public class ItemService {
         item.setPrice(itemDto.getPrice());
         item.setQuantity(itemDto.getQuantity());
         item.setItemStatus(itemDto.getItemStatus());
+
+
         if(imgList.size() > 0) {
             List<ItemImg> newItemImgList = saveImage(item, imgList);
             itemImgRepository.saveAll(newItemImgList);
@@ -105,14 +107,16 @@ public class ItemService {
     public void deleteItem(long id, String email) throws CustomException {
         if(!checkUser(id, email)) throw new ItemException("상품 삭제 권한 없음");
         Item item = getItem(id);
+        DeletedItem deletedItem = DeletedItem.getInstance(item);
+        deletedItemRepository.save(deletedItem);
+
         itemImgRepository.deleteAllByItem(item);
         cartItemRepository.deleteAllByItem(item);
         List<OrderItem> orderItemList = orderItemRepository.findByItem(item);
         for(OrderItem orderItem : orderItemList) {
-            Order order = orderItem.getOrder();
-            order.setPrice(order.getPrice()-orderItem.getPrice());
+            orderItem.setItem(null);
+            orderItem.setDeletedItem(deletedItem);
         }
-        orderItemRepository.deleteAllByItem(item);
         itemRepository.deleteById(id);
     }
     //상품 quantity update
@@ -159,7 +163,7 @@ public class ItemService {
         return ItemImg.getInstance(savedFileName, oriImgName, imgUrl, repImgYn, item);
     }
 
-    public List<ItemImg> getItemImgs(Item i) {
+    private List<ItemImg> getItemImgs(Item i) {
         return itemImgRepository.findByItem(i);
     }
 

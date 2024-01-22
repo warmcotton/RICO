@@ -10,6 +10,7 @@ public class OrderItemDto {
     private int count;
     private int price;
     private Long itemId;
+    private Long deletedItemId;
     private String itemName;
 
     public static OrderItemDto getOrderItemDto(OrderItem orderItem) {
@@ -17,8 +18,15 @@ public class OrderItemDto {
         orderItemDto.setId(orderItem.getId());
         orderItemDto.setCount(orderItem.getCount());
         orderItemDto.setPrice(orderItem.getPrice());
-        orderItemDto.setItemId(orderItem.getItem().getId());
-        orderItemDto.setItemName(orderItem.getItem().getName());
+
+        if(orderItem.getItem() != null) {
+            orderItemDto.setItemId(orderItem.getItem().getId());
+            orderItemDto.setItemName(orderItem.getItem().getName());
+        }
+        else {
+            orderItemDto.setDeletedItemId(orderItem.getDeletedItem().getId());
+            orderItemDto.setItemName(orderItem.getDeletedItem().getName());
+        }
         return orderItemDto;
     }
 
@@ -29,6 +37,7 @@ public class OrderItemDto {
                 ", count=" + count +
                 ", price=" + price +
                 ", itemId=" + itemId +
+                ", deletedItemId=" + deletedItemId +
                 ", itemName='" + itemName + '\'' +
                 '}';
     }
