@@ -28,14 +28,14 @@ public class ItemDto {
     private List<ItemImgDto> itemImgDtoList;
     private String user; //
 
-    public static ItemDto getDto(Item i, List<ItemImg> itemImgDtoList) {
+    public static ItemDto getItemDto(Item i, List<ItemImg> itemImgDtoList) {
         ItemDto itemDto = new ItemDto();
         itemDto.setId(i.getId());
         itemDto.setName(i.getName());
         itemDto.setPrice(i.getPrice());
         itemDto.setQuantity(i.getQuantity());
         itemDto.setItemStatus(i.getItemStatus());
-        itemDto.setItemImgDtoList(itemImgDtoList.stream().map(ItemImgDto::getInstance).collect(Collectors.toList()));
+        itemDto.setItemImgDtoList(itemImgDtoList.stream().map(ItemImgDto::getItemImgDto).collect(Collectors.toList()));
         itemDto.setUser(i.getUser().getEmail());
         return itemDto;
     }

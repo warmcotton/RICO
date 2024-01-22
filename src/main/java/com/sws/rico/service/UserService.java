@@ -44,7 +44,7 @@ public class UserService implements UserDetailsService {
     public UserDto registerNewUser(String email, String password, String name) throws CustomException {
         if (validateDuplicateEmail(email)) throw new UserException("이메일 중복");
         User user = userRepository.save(User.getInstance(email, password, name, passwordEncoder));
-        return UserDto.getInstance(user);
+        return UserDto.getUserDto(user);
     }
     //중복확인
     public boolean validateDuplicateEmail(String email) {
@@ -89,7 +89,7 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDto getUserDtoByEmail(String email) {
-        return UserDto.getInstance(getUser(email));
+        return UserDto.getUserDto(getUser(email));
     }
     
     public List<UserDto> getUserDtoList() {
@@ -99,10 +99,10 @@ public class UserService implements UserDetailsService {
     public UserDto update(UserDto userDto, String email) throws CustomException {
         User user = getUser(email);
         if (validateDuplicateEmail(userDto.getEmail())) throw new UserException("이메일 중복");
-        return UserDto.getInstance(user.setInstance(userDto, passwordEncoder));
+        return UserDto.getUserDto(user.setInstance(userDto, passwordEncoder));
     }
 
     public UserDto getUserDtoById(Long userId) {
-        return UserDto.getInstance(userRepository.findById(userId).get());
+        return UserDto.getUserDto(userRepository.findById(userId).get());
     }
 }

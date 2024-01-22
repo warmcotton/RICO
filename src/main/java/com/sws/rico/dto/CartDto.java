@@ -20,7 +20,7 @@ public class CartDto {
     @Size(min = 1)
     private List<@Valid CartItemDto> cartItemDto;
     private String user;
-    public static CartDto getInstance(Cart c, List<CartItem> cartItemList) {
+    public static CartDto getCartDto(Cart c, List<CartItem> cartItemList) {
         CartDto cartDto = new CartDto();
         cartDto.setId(c.getId());
         cartDto.setDate(c.getCreatedAt());

@@ -86,7 +86,7 @@ public class OrderService {
         List<OrderDto> orderDtoList = new ArrayList<>();
         for(Order o : orderList) {
             List<OrderItem> orderItemList = getOrderItems(o);
-            OrderDto orderDto = OrderDto.getInstance(o, orderItemList);
+            OrderDto orderDto = OrderDto.getOrderDto(o, orderItemList);
             orderDtoList.add(orderDto);
         }
         return orderDtoList;

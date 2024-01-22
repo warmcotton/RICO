@@ -17,7 +17,7 @@ public class UserDto {
     @NotEmpty
     private String name;
 
-    public static UserDto getInstance(User user) {
+    public static UserDto getUserDto(User user) {
         UserDto userDto = new UserDto();
         userDto.id = user.getId();
         userDto.email = user.getEmail();

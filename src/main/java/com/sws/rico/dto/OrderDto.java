@@ -19,13 +19,13 @@ public class OrderDto {
     private List<OrderItemDto> orderItemDtoList;
     private String user;
 
-    public static OrderDto getInstance(Order order, List<OrderItem> orderItemList) {
+    public static OrderDto getOrderDto(Order order, List<OrderItem> orderItemList) {
         OrderDto orderDto = new OrderDto();
         orderDto.setId(order.getId());
         orderDto.setPrice(order.getPrice());
         orderDto.setStatus(order.getStatus());
         orderDto.setDate(order.getOrderDate());
-        orderDto.setOrderItemDtoList(orderItemList.stream().map(OrderItemDto::getInstance).collect(Collectors.toList()));
+        orderDto.setOrderItemDtoList(orderItemList.stream().map(OrderItemDto::getOrderItemDto).collect(Collectors.toList()));
         orderDto.setUser(order.getUser().getEmail());
         return orderDto;
     }

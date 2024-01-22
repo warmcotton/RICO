@@ -12,7 +12,7 @@ public class OrderItemDto {
     private Long itemId;
     private String itemName;
 
-    public static OrderItemDto getInstance(OrderItem orderItem) {
+    public static OrderItemDto getOrderItemDto(OrderItem orderItem) {
         OrderItemDto orderItemDto = new OrderItemDto();
         orderItemDto.setId(orderItem.getId());
         orderItemDto.setCount(orderItem.getCount());

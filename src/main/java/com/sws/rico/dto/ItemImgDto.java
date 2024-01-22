@@ -12,7 +12,7 @@ public class ItemImgDto {
     private String imgUrl;
     private String repimgYn;
 
-    public static ItemImgDto getInstance(ItemImg itemImg) {
+    public static ItemImgDto getItemImgDto(ItemImg itemImg) {
         ItemImgDto itemImgDto = new ItemImgDto();
         itemImgDto.id = itemImg.getId();
         itemImgDto.imgName = itemImg.getImgName();

@@ -28,7 +28,7 @@ public class ConsumerService {
         cart.add(ct);
         Order order = orderService.order(cart, email);
         List<OrderItem> orderItemList = orderService.getOrderItems(order);
-        return OrderDto.getInstance(order, orderItemList);
+        return OrderDto.getOrderDto(order, orderItemList);
     }
     //복수 카트 주문
     public OrderDto orderCarts(List<CartDto> cartDtoList, String email) throws CustomException{
@@ -42,7 +42,7 @@ public class ConsumerService {
         }
         Order order = orderService.order(cartList, email);
         List<OrderItem> orderItemList = orderService.getOrderItems(order);
-        return OrderDto.getInstance(order, orderItemList);
+        return OrderDto.getOrderDto(order, orderItemList);
     }
 
     //주문취소

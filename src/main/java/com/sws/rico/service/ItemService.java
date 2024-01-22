@@ -50,7 +50,7 @@ public class ItemService {
         return itemRepository.findById(id).get();
     }
     //상품목록 조회
-    protected List<Item> getItems() { return itemRepository.findAll();}
+    protected List<Item> getItems() { return itemRepository.findAll();} //protected : ConsumerService 한정
     //내 판매상품 조회
     public List<ItemDto> getMyItems(Long userId, String email) throws CustomException {
         if(!checkUser(userId, email)) throw new ItemException("상품 접근 권한 없음");
@@ -58,10 +58,16 @@ public class ItemService {
         return itemRepository.findByUser(user).stream()
                 .map(item -> getItemDto(item.getId())).collect(Collectors.toList());
     }
+    //유저 판매상품 조회
+    public List<ItemDto> getUserItems(Long userId) throws CustomException {
+        User user = userRepository.findById(userId).get();
+        return itemRepository.findByUser(user).stream()
+                .map(item -> getItemDto(item.getId())).collect(Collectors.toList());
+    }
     public ItemDto getItemDto(Long id) {
         Item item = getItem(id);
         List<ItemImg> itemImgList = getItemImgs(item);
-        return ItemDto.getDto(item,itemImgList);
+        return ItemDto.getItemDto(item,itemImgList);
     }
     public List<ItemDto> getItemDtoList(String item, String name, Pageable page) {
         return itemRepository.findByNameContaining(item, page).stream()
