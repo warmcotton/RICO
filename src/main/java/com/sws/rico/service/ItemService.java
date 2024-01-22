@@ -9,6 +9,7 @@ import com.sws.rico.exception.ItemException;
 import com.sws.rico.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,12 +34,15 @@ public class ItemService {
     //상품생성(판매)
     public ItemDto saveItem(ItemDto itemDto, List<MultipartFile> imgList, String email) throws CustomException {
         User user = userRepository.findByEmail(email).get();
+
         Item newItem = Item.getInstance(itemDto.getName(),itemDto.getPrice(), itemDto.getQuantity(),itemDto.getItemStatus(), user);
         Item item = itemRepository.save(newItem);
+
         if(imgList.size() > 0) {
             List<ItemImg> newItemImgList = saveImage(item, imgList);
             itemImgRepository.saveAll(newItemImgList);
         }
+
         return getItemDto(item.getId());
     }
     //상품 조회
@@ -59,9 +63,10 @@ public class ItemService {
         List<ItemImg> itemImgList = getItemImgs(item);
         return ItemDto.getDto(item,itemImgList);
     }
-    public List<ItemDto> getItemDtoList(String name) {
-        return itemRepository.findByNameContaining(name).stream()
-                .map(item -> getItemDto(item.getId())).collect(Collectors.toList());
+    public List<ItemDto> getItemDtoList(String item, String name, Pageable page) {
+        return itemRepository.findByNameContaining(item, page).stream()
+                .filter(res -> res.getUser().getName().contains(name))
+                .map(res -> getItemDto(res.getId())).collect(Collectors.toList());
     }
     //상품 수량 차감 : 아이템수량 - 주문수량 비교
     protected boolean checkAndReduce(long id, int quantity) {
@@ -136,7 +141,7 @@ public class ItemService {
         assert oriImgName != null;
         String extension = oriImgName.substring(oriImgName.lastIndexOf("."));
         String savedFileName = uuid + extension;
-        String imgUrl = "/images/dang-geun/"+savedFileName;
+        String imgUrl = "/images/rico/"+savedFileName;
         try {
             FileOutputStream fos = new FileOutputStream(imgLocation+"/"+savedFileName);
             fos.write(file.getBytes());

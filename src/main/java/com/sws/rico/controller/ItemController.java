@@ -5,6 +5,8 @@ import com.sws.rico.exception.CustomException;
 import com.sws.rico.service.ConsumerService;
 import com.sws.rico.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -23,8 +25,11 @@ public class ItemController {
 
     @ResponseBody
     @GetMapping("/items")
-    public List<ItemDto> getItems(@RequestParam(value = "item", defaultValue = "") String item) {
-        return itemService.getItemDtoList(item);
+    public List<ItemDto> getItems(@RequestParam(value = "item", defaultValue = "") String item,
+                                  @RequestParam(value = "user", defaultValue = "") String user,
+                                  @PageableDefault(size=10) Pageable page) {
+
+        return itemService.getItemDtoList(item, user, page);
     }
 
     @ResponseBody
