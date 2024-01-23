@@ -21,7 +21,7 @@ public class CartController {
     @ResponseBody
     @GetMapping("/carts")
     public List<CartDto> getCarts(Authentication authentication) {
-        return cartService.getCartDtoList(authentication.getName());
+        return cartService.getCartDtosByEmail(authentication.getName());
     }
 
     @ResponseBody
@@ -41,7 +41,7 @@ public class CartController {
     @ResponseBody
     @PostMapping ("/cart/create")
     public CartDto createCart(Authentication authentication) {
-        return cartService.getNewCart(authentication.getName());
+        return cartService.createCart(authentication.getName());
     }
 
     @ResponseBody

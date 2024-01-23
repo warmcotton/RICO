@@ -33,7 +33,7 @@ public class ItemService {
     private final DeletedItemRepository deletedItemRepository;
     @Value("${img.location}") private String imgLocation;
     //상품생성(판매)
-    public ItemDto saveItem(ItemDto itemDto, List<MultipartFile> imgList, String email) throws CustomException {
+    public ItemDto createItem(ItemDto itemDto, List<MultipartFile> imgList, String email) throws CustomException {
         User user = userRepository.findByEmail(email).get();
 
         Item newItem = Item.getInstance(itemDto.getName(),itemDto.getPrice(), itemDto.getQuantity(),itemDto.getItemStatus(), user);
@@ -70,7 +70,7 @@ public class ItemService {
         List<ItemImg> itemImgList = getItemImgs(item);
         return ItemDto.getItemDto(item,itemImgList);
     }
-    public List<ItemDto> getItemDtoList(String item, String name, Pageable page) {
+    public List<ItemDto> getItemDtos(String item, String name, Pageable page) {
         return itemRepository.findByNameContaining(item, page).stream()
                 .filter(res -> res.getUser().getName().contains(name))
                 .map(res -> getItemDto(res.getId())).collect(Collectors.toList());

@@ -27,41 +27,41 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final ItemRepository itemRepository;
     //카트조회
-    public Cart getCart(Long id) {
+    protected Cart getCart(Long id) {
         return cartRepository.findById(id).get();
     }
     //카트목록조회
-    private List<Cart> getCarts(String email) {
+    private List<Cart> getCartsByEmail(String email) {
         User user = userRepository.findByEmail(email).get();
         return cartRepository.findByUser(user);
     }
     //카트상품조회
     private CartItem getCartItem(Long id) { return cartItemRepository.findById(id).get(); }
     //카트상품목록조회
-    private List<CartItem> getCartItems(Long cartId) {
+    private List<CartItem> getCartItemsByCartId(Long cartId) {
         Cart cart = getCart(cartId);
         List<CartItem> cartItemList = cartItemRepository.findByCart(cart);
         return cartItemList;
     }
 
-    public List<CartDto> getCartDtoList(String email) {
-        List<Cart> cartList = getCarts(email);
+    public List<CartDto> getCartDtosByEmail(String email) {
+        List<Cart> cartList = getCartsByEmail(email);
         List<CartDto> cartDtoList = new ArrayList<>();
         for(Cart c : cartList) {
-            List<CartItem> cartItemList = getCartItems(c.getId());
+            List<CartItem> cartItemList = getCartItemsByCartId(c.getId());
             CartDto newCartDto = CartDto.getCartDto(c, cartItemList);
             cartDtoList.add(newCartDto);
         }
         return cartDtoList;
     }
     //빈 카트생성
-    private Cart createCart(String email) {
+    private Cart createCartByEmail(String email) {
         User user = userRepository.findByEmail(email).get();
         return cartRepository.save(Cart.getInstance(user));
     }
 
-    public CartDto getNewCart(String email) {
-        return CartDto.getCartDto(createCart(email),new ArrayList<>());
+    public CartDto createCart(String email) {
+        return CartDto.getCartDto(createCartByEmail(email),new ArrayList<>());
     }
     //카트삭제
     public void deleteCart(Long id, String email) throws CustomException {
@@ -72,7 +72,7 @@ public class CartService {
     }
     //단일아이템카트주문
     public Cart createCartWithSingleItem(Long id, int quantity, String email) throws CustomException {
-        Cart newCart = createCart(email);
+        Cart newCart = createCartByEmail(email);
         Item item = itemRepository.findById(id).get();
         if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("판매중 아님");
         CartItem cartItem = CartItem.getInstance(quantity, item, newCart);
@@ -87,7 +87,7 @@ public class CartService {
         if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("판매중 아님");
         CartItem cartItem = CartItem.getInstance(quantity, item, cart);
         cartItemRepository.save(cartItem);
-        return CartDto.getCartDto(cart, getCartItems(cartId));
+        return CartDto.getCartDto(cart, getCartItemsByCartId(cartId));
     }
     //카트상품삭제
     public void deleteCartItem(Long cartItemId, String email) throws CustomException {
@@ -99,7 +99,7 @@ public class CartService {
 
     public CartDto getCartDto(Long cartId, String email) throws CustomException {
         if(!checkUser(cartId, email)) throw new CartException("카트 접근 권한 없음");
-        return CartDto.getCartDto(getCart(cartId),getCartItems(cartId));
+        return CartDto.getCartDto(getCart(cartId), getCartItemsByCartId(cartId));
     }
 
     private boolean checkUser(Long id, String email) {

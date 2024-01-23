@@ -24,7 +24,7 @@ public class OrderController {
     @GetMapping ("/item/{itemId}/order")
     public OrderDto orderItem(@PathVariable Long itemId, @RequestParam int quantity, Authentication authentication) throws CustomException {
         if(itemId < 1 || quantity < 1) throw new IllegalArgumentException("Invalid Arguments");
-        return consumerService.orderSingleItem(itemId, quantity, authentication.getName());
+        return consumerService.orderItem(itemId, quantity, authentication.getName());
     }
 
     @ResponseBody

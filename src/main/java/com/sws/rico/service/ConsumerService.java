@@ -21,7 +21,7 @@ public class ConsumerService {
     private final OrderService orderService;
     private final ItemService itemService;
     //단일 아이템 주문 : 수량확인 -> 카트생성 -> 주문
-    public OrderDto orderSingleItem(Long id, int quantity, String email) throws CustomException {
+    public OrderDto orderItem(Long id, int quantity, String email) throws CustomException {
         if (!itemService.checkAndReduce(id, quantity)) throw new ItemException("수량 없음");
         List<Cart> cart = new ArrayList<>();
         Cart ct = cartService.createCartWithSingleItem(id, quantity, email); //createCart x

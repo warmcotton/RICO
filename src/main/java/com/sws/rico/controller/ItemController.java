@@ -29,7 +29,7 @@ public class ItemController {
                                   @RequestParam(value = "user", defaultValue = "") String user,
                                   @PageableDefault(size=10) Pageable page) {
 
-        return itemService.getItemDtoList(item, user, page);
+        return itemService.getItemDtos(item, user, page);
     }
 
     @ResponseBody
@@ -42,7 +42,7 @@ public class ItemController {
     @ResponseBody
     @PostMapping("/item")
     public ItemDto saveItem(@RequestPart List<MultipartFile> itemFileList, @RequestPart @Valid ItemDto itemDto, Authentication authentication) throws CustomException {
-        return itemService.saveItem(itemDto, itemFileList, authentication.getName());
+        return itemService.createItem(itemDto, itemFileList, authentication.getName());
     }
 
     @DeleteMapping("/item/{itemId}")
