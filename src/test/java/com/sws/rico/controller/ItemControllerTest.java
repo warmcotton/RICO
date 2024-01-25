@@ -61,7 +61,7 @@ class ItemControllerTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach()
-    void init() throws CustomException {
+    void init() {
         User user1 = User.getInstance("sws@sws","1111","sws",passwordEncoder);
         User user2 = User.getInstance("jch@jch","1111","jch",passwordEncoder);
 
@@ -76,7 +76,7 @@ class ItemControllerTest {
         itemRepository.saveAll(asList(item1, item2));
         itemImgRepository.saveAll(asList(itemImg1, itemImg2, itemImg3));
 
-        consumerService.orderSingleItem(1L, 3, "sws@sws");
+
     }
 
     @Test
@@ -225,6 +225,8 @@ class ItemControllerTest {
 
     @Test
     void deleteItem() throws Exception {
+        consumerService.orderItem(1L, 3, "sws@sws");
+
         mvc.perform(delete("/item/1").with(user("sws@sws")))
                 .andDo(print()).andExpect(status().isOk());
 
@@ -232,6 +234,8 @@ class ItemControllerTest {
 
     @Test
     void deleteItem_wrongUser() throws Exception {
+        consumerService.orderItem(1L, 3, "sws@sws");
+
         mvc.perform(delete("/item/1").with(user("jch@jch")))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
