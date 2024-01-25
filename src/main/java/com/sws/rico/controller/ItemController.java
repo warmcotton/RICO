@@ -2,9 +2,9 @@ package com.sws.rico.controller;
 
 import com.sws.rico.dto.ItemDto;
 import com.sws.rico.exception.CustomException;
-import com.sws.rico.service.ConsumerService;
 import com.sws.rico.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -14,35 +14,32 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.List;
-
 @Controller
 @RequiredArgsConstructor
 public class ItemController {
-    private final ConsumerService consumerService;
     private final ItemService itemService;
 
     @ResponseBody
     @GetMapping("/items")
-    public List<ItemDto> getItems(@RequestParam(value = "item", defaultValue = "") String item,
-                                  @RequestParam(value = "user", defaultValue = "") String user,
-                                  @PageableDefault(size=10) Pageable page) {
+    public ResponseEntity<Page<ItemDto>> getItems(@RequestParam(value = "item", defaultValue = "") String item,
+                                                  @RequestParam(value = "user", defaultValue = "") String user,
+                                                  @PageableDefault(size=10) Pageable page) {
 
-        return itemService.getItemDtos(item, user, page);
+        return ResponseEntity.ok(itemService.getItemDtos(item, user, page));
     }
 
     @ResponseBody
     @GetMapping("/item/{itemId}")
-    public ItemDto getItem(@PathVariable Long itemId) {
+    public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId) {
         if(itemId<1) throw new IllegalArgumentException("Invalid Arguments");
-        return itemService.getItemDto(itemId);
+        return ResponseEntity.ok(itemService.getItemDtoById(itemId));
     }
 
     @ResponseBody
     @PostMapping("/item")
-    public ItemDto saveItem(@RequestPart List<MultipartFile> itemFileList, @RequestPart @Valid ItemDto itemDto, Authentication authentication) throws CustomException {
-        return itemService.createItem(itemDto, itemFileList, authentication.getName());
+    public ResponseEntity<ItemDto> saveItem(@RequestPart List<MultipartFile> itemFileList, @RequestPart @Valid ItemDto itemDto, Authentication authentication) throws CustomException {
+        return ResponseEntity.ok(itemService.createItem(itemDto, itemFileList, authentication.getName()));
     }
 
     @DeleteMapping("/item/{itemId}")
@@ -54,22 +51,22 @@ public class ItemController {
 
     @ResponseBody
     @PutMapping("/item/{itemId}")
-    public ItemDto updateItem(@PathVariable Long itemId, @RequestPart @Valid ItemDto itemDto,
-                              @RequestPart List<MultipartFile> itemFileList, Authentication authentication) throws CustomException, IOException {
+    public ResponseEntity<ItemDto> updateItem(@PathVariable Long itemId, @RequestPart @Valid ItemDto itemDto,
+                              @RequestPart List<MultipartFile> itemFileList, Authentication authentication) throws CustomException {
         if(itemId<1) throw new IllegalArgumentException("Invalid Arguments");
-        return itemService.updateItem(itemId, itemDto, itemFileList, authentication.getName());
+        return ResponseEntity.ok(itemService.updateItem(itemId, itemDto, itemFileList, authentication.getName()));
     }
 
     @ResponseBody
     @GetMapping("/user/myitems")
-    public List<ItemDto> getMyItems(Authentication authentication) throws CustomException {
-        return itemService.getMyItems(authentication.getName());
+    public ResponseEntity<Page<ItemDto>> getMyItems(Authentication authentication, @PageableDefault(size=10) Pageable page) {
+        return ResponseEntity.ok(itemService.getMyItems(authentication.getName(), page));
     }
 
     @ResponseBody
     @GetMapping("/user/{userId}/items")
-    public List<ItemDto> getUserItems(@PathVariable Long userId) throws CustomException {
+    public ResponseEntity<Page<ItemDto>> getUserItems(@PathVariable Long userId, @PageableDefault(size=10) Pageable page) {
         if(userId<1) throw new IllegalArgumentException("Invalid Arguments");
-        return itemService.getUserItems(userId);
+        return ResponseEntity.ok(itemService.getUserItems(userId, page));
     }
 }

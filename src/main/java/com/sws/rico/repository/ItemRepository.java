@@ -2,14 +2,19 @@ package com.sws.rico.repository;
 
 import com.sws.rico.entity.Item;
 import com.sws.rico.entity.User;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByUser(User user);
 
-    Page<Item> findByNameContaining(String name, Pageable pageable);
+    @Query(value = "select i from Item i " +
+            "inner join fetch User u on i.user.id = u.id " +
+            "where u.name like concat('%', :name, '%') or i.name like concat('%', :user, '%')")
+    Page<Item> findPageItem(String name, String user, Pageable pageable);
 }

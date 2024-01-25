@@ -9,6 +9,7 @@ import com.sws.rico.exception.ItemException;
 import com.sws.rico.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,7 +45,7 @@ public class ItemService {
             itemImgRepository.saveAll(newItemImgList);
         }
 
-        return getItemDto(item.getId());
+        return getItemDtoById(item.getId());
     }
     //상품 조회
     private Item getItem(Long id) {
@@ -53,27 +54,24 @@ public class ItemService {
     //상품목록 조회
     protected List<Item> getItems() { return itemRepository.findAll();} //protected : ConsumerService 한정
     //내 판매상품 조회
-    public List<ItemDto> getMyItems(String email) {
+    public Page<ItemDto> getMyItems(String email, Pageable page) {
         User user = userRepository.findByEmail(email).get();
-        return itemRepository.findByUser(user).stream()
-                .map(item -> getItemDto(item.getId())).collect(Collectors.toList());
+        return getItemDtos("", user.getName(),page);
     }
     //유저 판매상품 조회
-    public List<ItemDto> getUserItems(Long userId) throws CustomException {
+    public Page<ItemDto> getUserItems(Long userId, Pageable page) {
         User user = userRepository.findById(userId).get();
-        return itemRepository.findByUser(user).stream()
-                .map(item -> getItemDto(item.getId())).collect(Collectors.toList());
+        return getItemDtos("", user.getName(),page);
 
     }
-    public ItemDto getItemDto(Long id) {
+    public ItemDto getItemDtoById(Long id) {
         Item item = getItem(id);
         List<ItemImg> itemImgList = getItemImgs(item);
         return ItemDto.getItemDto(item,itemImgList);
     }
-    public List<ItemDto> getItemDtos(String item, String name, Pageable page) {
-        return itemRepository.findByNameContaining(item, page).stream()
-                .filter(res -> res.getUser().getName().contains(name))
-                .map(res -> getItemDto(res.getId())).collect(Collectors.toList());
+    public Page<ItemDto> getItemDtos(String item, String user, Pageable page) {
+        return itemRepository.findPageItem(item, user, page)
+                .map(pageItem -> ItemDto.getItemDto(pageItem, getItemImgs(pageItem)));
     }
     //상품 수량 차감 : 아이템수량 - 주문수량 비교
     protected boolean checkAndReduce(long id, int quantity) {
@@ -101,7 +99,7 @@ public class ItemService {
             itemImgRepository.saveAll(newItemImgList);
         }
         itemImgRepository.deleteAllByItem(item);
-        return getItemDto(item.getId());
+        return getItemDtoById(item.getId());
     }
     //상품 삭제
     public void deleteItem(long id, String email) throws CustomException {

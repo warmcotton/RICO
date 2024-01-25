@@ -12,6 +12,8 @@ import com.sws.rico.repository.CartRepository;
 import com.sws.rico.repository.ItemRepository;
 import com.sws.rico.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -31,10 +33,10 @@ public class CartService {
         return cartRepository.findById(id).get();
     }
     //카트목록조회
-    private List<Cart> getCartsByEmail(String email) {
-        User user = userRepository.findByEmail(email).get();
-        return cartRepository.findByUser(user);
-    }
+//    private List<Cart> getCartsByEmail(String email) {
+//        User user = userRepository.findByEmail(email).get();
+//        return cartRepository.findByUser(user);
+//    }
     //카트상품조회
     private CartItem getCartItem(Long id) { return cartItemRepository.findById(id).get(); }
     //카트상품목록조회
@@ -44,16 +46,13 @@ public class CartService {
         return cartItemList;
     }
 
-    public List<CartDto> getCartDtosByEmail(String email) {
-        List<Cart> cartList = getCartsByEmail(email);
-        List<CartDto> cartDtoList = new ArrayList<>();
-        for(Cart c : cartList) {
-            List<CartItem> cartItemList = getCartItemsByCartId(c.getId());
-            CartDto newCartDto = CartDto.getCartDto(c, cartItemList);
-            cartDtoList.add(newCartDto);
-        }
-        return cartDtoList;
+    public Page<CartDto> getCartDtosByEmail(String email, Pageable page) {
+        User user = userRepository.findByEmail(email).get();
+
+        return cartRepository.findByUser(user, page)
+                .map(cart -> CartDto.getCartDto(cart, getCartItemsByCartId(cart.getId())));
     }
+
     //빈 카트생성
     private Cart createCartByEmail(String email) {
         User user = userRepository.findByEmail(email).get();
