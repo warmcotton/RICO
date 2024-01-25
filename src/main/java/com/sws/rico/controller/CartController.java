@@ -46,11 +46,11 @@ public class CartController {
 
     @ResponseBody
     @PostMapping("/cart/{cartId}/add")
-    public CartDto addItem(@PathVariable Long cartId, @RequestBody HashMap<String, Object> item, Authentication authentication) throws CustomException {
+    public CartDto addItem(@PathVariable Long cartId, @RequestBody HashMap<String, String> item, Authentication authentication) throws CustomException {
         long itemId; int quantity;
         try {
-            itemId = (Long) item.get("itemId");
-            quantity = (int) item.get("quantity");
+            itemId = Long.parseLong(item.get("itemId"));
+            quantity = Integer.parseInt(item.get("quantity"));
         } catch (ClassCastException exception) {
             throw new IllegalArgumentException("Invalid Arguments");
         }
