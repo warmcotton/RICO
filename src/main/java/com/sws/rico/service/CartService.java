@@ -75,6 +75,7 @@ public class CartService {
         Cart newCart = createCartByEmail(email);
         Item item = itemRepository.findById(id).get();
         if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("판매중 아님");
+        if(item.getUser().getEmail().equals(email)) throw new CartException("본인이 판매하는 상품 주문 x");
         CartItem cartItem = CartItem.getInstance(quantity, item, newCart);
         cartItemRepository.save(cartItem);
         return newCart;
@@ -85,6 +86,7 @@ public class CartService {
         Cart cart = getCart(cartId);
         Item item = itemRepository.findById(itemId).get();
         if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("판매중 아님");
+        if(item.getUser().getEmail().equals(email)) throw new CartException("본인이 판매하는 상품 주문 x");
         CartItem cartItem = CartItem.getInstance(quantity, item, cart);
         cartItemRepository.save(cartItem);
         return CartDto.getCartDto(cart, getCartItemsByCartId(cartId));

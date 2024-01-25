@@ -3,6 +3,8 @@ package com.sws.rico.service;
 import com.sws.rico.constant.OrderStatus;
 import com.sws.rico.dto.OrderDto;
 import com.sws.rico.entity.*;
+import com.sws.rico.exception.CartException;
+import com.sws.rico.exception.CustomException;
 import com.sws.rico.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -28,7 +30,7 @@ public class OrderService {
         return orderRepository.findById(id).get();
     }
     //주문
-    public Order order(List<Cart> cartList, String email) { //상품 수량 확인 -> ( 아이템 수량 차감 -> 주문 ) 하나의 트랜잭션
+    public Order order(List<Cart> cartList, String email) throws CustomException { //상품 수량 확인 -> ( 아이템 수량 차감 -> 주문 ) 하나의 트랜잭션
         User user = userRepository.findByEmail(email).get();
         Order newOrder = orderRepository.save(Order.getInstance(user, OrderStatus.ORDER));
         int total = 0;
@@ -37,6 +39,7 @@ public class OrderService {
             int order_item_price = 0;
             for (CartItem cit : cartItem) {
                 Item item = cit.getItem();
+                if(item.getUser().getEmail().equals(email)) throw new CartException("본인이 판매하는 상품 주문 x");
                 int price = item.getPrice()*cit.getCount();
                 order_item_price += price;
                 OrderItem newOrderItem = OrderItem.getInstance(item,newOrder,cit.getCount(),price);
