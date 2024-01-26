@@ -5,10 +5,13 @@ import com.sws.rico.dto.OrderDto;
 import com.sws.rico.entity.*;
 import com.sws.rico.exception.CartException;
 import com.sws.rico.exception.CustomException;
+import com.sws.rico.exception.OrderException;
 import com.sws.rico.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -25,10 +28,13 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
+
+
     //조회
     public Order getOrder(Long id) {
         return orderRepository.findById(id).get();
     }
+
     //주문
     public Order order(List<Cart> cartList, String email) throws CustomException { //상품 수량 확인 -> ( 아이템 수량 차감 -> 주문 ) 하나의 트랜잭션
         User user = userRepository.findByEmail(email).get();
@@ -39,7 +45,7 @@ public class OrderService {
             int order_item_price = 0;
             for (CartItem cit : cartItem) {
                 Item item = cit.getItem();
-                if(item.getUser().getEmail().equals(email)) throw new CartException("본인이 판매하는 상품 주문 x");
+                if(item.getUser().getEmail().equals(email)) throw new OrderException("본인이 판매하는 상품 주문 x");
                 int price = item.getPrice()*cit.getCount();
                 order_item_price += price;
                 OrderItem newOrderItem = OrderItem.getInstance(item,newOrder,cit.getCount(),price);
@@ -61,19 +67,17 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 
-    private List<Order> getOrders(String email) {
-        User user = userRepository.findByEmail(email).get();
-        return orderRepository.findByUser(user);
-    }
 
     public List<OrderItem> getOrderItems(Order order) {
         List<OrderItem> orderItemList = orderItemRepository.findByOrder(order);
         return orderItemList;
     }
 
+
     public boolean checkUser(Long id, String email) {
         return email.equals(getOrder(id).getUser().getEmail());
     }
+
     //12시간 후 배송완료
     @EventListener
     public void updateOrderStatus(ContextRefreshedEvent event) {
@@ -84,14 +88,10 @@ public class OrderService {
         }
     }
 
-    public List<OrderDto> getOrderDtoList(String email) {
-        List<Order> orderList = getOrders(email);
-        List<OrderDto> orderDtoList = new ArrayList<>();
-        for(Order o : orderList) {
-            List<OrderItem> orderItemList = getOrderItems(o);
-            OrderDto orderDto = OrderDto.getOrderDto(o, orderItemList);
-            orderDtoList.add(orderDto);
-        }
-        return orderDtoList;
+
+    public Page<OrderDto> getOrderDtoList(String email, Pageable page) {
+        User user = userRepository.findByEmail(email).get();
+        return orderRepository.findByUser(user, page)
+                .map(order -> OrderDto.getOrderDto(order, getOrderItems(order)));
     }
 }
