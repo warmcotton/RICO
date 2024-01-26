@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableJpaAuditing
-public class RicoApplication {
+public class Rico {
 	public static void main(String[] args) {
-		SpringApplication.run(RicoApplication.class, args);
+		SpringApplication.run(Rico.class, args);
 	}
 
 }
