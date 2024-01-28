@@ -100,7 +100,7 @@ public class OrderControllerTest {
                         .param("quantity", "50"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException().getClass().isAssignableFrom(ItemException.class)));
+                .andExpect(result -> assertTrue(result.getResolvedException().getClass().isAssignableFrom(OrderException.class)));
     }
 
 

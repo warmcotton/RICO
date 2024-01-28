@@ -6,12 +6,10 @@ import com.sws.rico.dto.ItemDto;
 import com.sws.rico.entity.Item;
 import com.sws.rico.entity.ItemImg;
 import com.sws.rico.entity.User;
-import com.sws.rico.exception.CustomException;
 import com.sws.rico.exception.ItemException;
 import com.sws.rico.repository.ItemImgRepository;
 import com.sws.rico.repository.ItemRepository;
 import com.sws.rico.repository.UserRepository;
-import com.sws.rico.service.ConsumerService;
 import com.sws.rico.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -226,7 +224,7 @@ class ItemControllerTest {
 
     @Test
     void deleteItem() throws Exception {
-        orderService.orderItem(1L, 3, "sws@sws");
+        orderService.orderItem(1L, 3, "jch@jch");
 
         mvc.perform(delete("/item/1").with(user("sws@sws")))
                 .andDo(print()).andExpect(status().isOk());
@@ -235,7 +233,7 @@ class ItemControllerTest {
 
     @Test
     void deleteItem_wrongUser() throws Exception {
-        orderService.orderItem(1L, 3, "sws@sws");
+        orderService.orderItem(1L, 3, "jch@jch");
 
         mvc.perform(delete("/item/1").with(user("jch@jch")))
                 .andDo(print())
