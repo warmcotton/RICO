@@ -33,7 +33,6 @@ public class ItemService {
     private final CommonUserService commonUserService;
     @Value("${img.location}") private String imgLocation;
 
-    //상품생성(판매)
     public ItemDto createItem(ItemDto itemDto, List<MultipartFile> imgList, String email) throws CustomException {
         User user = userRepository.findByEmail(email).get();
         Item newItem = Item.getInstance(itemDto.getName(),itemDto.getPrice(), itemDto.getQuantity(),itemDto.getItemStatus(), user);
@@ -46,13 +45,11 @@ public class ItemService {
         return getItemDto(item.getId());
     }
 
-    //내 판매상품 조회
     public Page<ItemDto> getMyItemPage(String email, Pageable page) {
         User user = userRepository.findByEmail(email).get();
         return getItemDtoPage("", user.getName(),page);
     }
 
-    //유저 판매상품 조회
     public Page<ItemDto> getUserItemPage(Long userId, Pageable page) {
         User user = userRepository.findById(userId).get();
         return getItemDtoPage("", user.getName(),page);
@@ -69,7 +66,6 @@ public class ItemService {
         return ItemDto.getItemDto(item,itemImgList);
     }
 
-    //상품 업데이트
     public ItemDto updateItem(Long id, ItemDto itemDto, List<MultipartFile> imgList, String email) throws CustomException {
         if(!commonUserService.checkUser(id, email)) throw new ItemException("상품 수정 권한 없음");
         Item item = getItem(id);
@@ -86,7 +82,6 @@ public class ItemService {
         return getItemDto(item.getId());
     }
 
-    //상품 삭제
     public void deleteItem(long id, String email) throws CustomException {
         if(!commonUserService.checkUser(id, email)) throw new ItemException("상품 삭제 권한 없음");
         Item item = getItem(id);

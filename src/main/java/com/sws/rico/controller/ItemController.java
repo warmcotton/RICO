@@ -25,7 +25,6 @@ public class ItemController {
     public ResponseEntity<Page<ItemDto>> getItems(@RequestParam(value = "item", defaultValue = "") String item,
                                                   @RequestParam(value = "user", defaultValue = "") String user,
                                                   @PageableDefault(size=10) Pageable page) {
-
         return ResponseEntity.ok(itemService.getMainItemPage(item, user, page));
     }
 

@@ -23,7 +23,7 @@ public class CartController {
     @ResponseBody
     @GetMapping("/carts")
     public ResponseEntity<Page<CartDto>> getCarts(Authentication authentication, @PageableDefault(size=5) Pageable page) {
-        return ResponseEntity.ok(cartService.getCartDtosByEmail(authentication.getName(), page));
+        return ResponseEntity.ok(cartService.getMyCartPage(authentication.getName(), page));
     }
 
     @ResponseBody
