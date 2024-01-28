@@ -26,14 +26,14 @@ public class ItemController {
                                                   @RequestParam(value = "user", defaultValue = "") String user,
                                                   @PageableDefault(size=10) Pageable page) {
 
-        return ResponseEntity.ok(itemService.getItemDtos(item, user, page));
+        return ResponseEntity.ok(itemService.getMainItemPage(item, user, page));
     }
 
     @ResponseBody
     @GetMapping("/item/{itemId}")
     public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId) {
         if(itemId<1) throw new IllegalArgumentException("Invalid Arguments");
-        return ResponseEntity.ok(itemService.getItemDtoById(itemId));
+        return ResponseEntity.ok(itemService.getItemDto(itemId));
     }
 
     @ResponseBody
@@ -60,13 +60,13 @@ public class ItemController {
     @ResponseBody
     @GetMapping("/user/myitems")
     public ResponseEntity<Page<ItemDto>> getMyItems(Authentication authentication, @PageableDefault(size=10) Pageable page) {
-        return ResponseEntity.ok(itemService.getMyItems(authentication.getName(), page));
+        return ResponseEntity.ok(itemService.getMyItemPage(authentication.getName(), page));
     }
 
     @ResponseBody
     @GetMapping("/user/{userId}/items")
     public ResponseEntity<Page<ItemDto>> getUserItems(@PathVariable Long userId, @PageableDefault(size=10) Pageable page) {
         if(userId<1) throw new IllegalArgumentException("Invalid Arguments");
-        return ResponseEntity.ok(itemService.getUserItems(userId, page));
+        return ResponseEntity.ok(itemService.getUserItemPage(userId, page));
     }
 }

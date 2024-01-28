@@ -12,6 +12,7 @@ import com.sws.rico.repository.ItemImgRepository;
 import com.sws.rico.repository.ItemRepository;
 import com.sws.rico.repository.UserRepository;
 import com.sws.rico.service.ConsumerService;
+import com.sws.rico.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class ItemControllerTest {
     @Autowired
-    private ConsumerService consumerService;
+    private OrderService orderService;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -225,7 +226,7 @@ class ItemControllerTest {
 
     @Test
     void deleteItem() throws Exception {
-        consumerService.orderItem(1L, 3, "sws@sws");
+        orderService.orderItem(1L, 3, "sws@sws");
 
         mvc.perform(delete("/item/1").with(user("sws@sws")))
                 .andDo(print()).andExpect(status().isOk());
@@ -234,7 +235,7 @@ class ItemControllerTest {
 
     @Test
     void deleteItem_wrongUser() throws Exception {
-        consumerService.orderItem(1L, 3, "sws@sws");
+        orderService.orderItem(1L, 3, "sws@sws");
 
         mvc.perform(delete("/item/1").with(user("jch@jch")))
                 .andDo(print())

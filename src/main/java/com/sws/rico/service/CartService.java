@@ -70,15 +70,15 @@ public class CartService {
         cartRepository.deleteById(id);
     }
     //단일아이템카트주문
-    public Cart createCartWithSingleItem(Long id, int quantity, String email) throws CustomException {
-        Cart newCart = createCartByEmail(email);
-        Item item = itemRepository.findById(id).get();
-        if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("판매중 아님");
-        if(item.getUser().getEmail().equals(email)) throw new CartException("본인이 판매하는 상품 주문 x");
-        CartItem cartItem = CartItem.getInstance(quantity, item, newCart);
-        cartItemRepository.save(cartItem);
-        return newCart;
-    }
+//    public Cart createCartWithSingleItem(Long id, int quantity, String email) throws CustomException {
+//        Cart newCart = createCartByEmail(email);
+//        Item item = itemRepository.findById(id).get();
+//        if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("판매중 아님");
+//        if(item.getUser().getEmail().equals(email)) throw new CartException("본인이 판매하는 상품 주문 x");
+//        CartItem cartItem = CartItem.getInstance(quantity, item, newCart);
+//        cartItemRepository.save(cartItem);
+//        return newCart;
+//    }
     //카트상품담기
     public CartDto addItemToCart(Long itemId, int quantity, Long cartId, String email) throws CustomException {
         if(!checkUser(cartId, email)) throw new CartException("카트 접근 권한 없음");
