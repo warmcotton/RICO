@@ -68,4 +68,9 @@ public class ItemController {
         if(userId<1) throw new IllegalArgumentException("Invalid Arguments");
         return ResponseEntity.ok(itemService.getUserItemPage(userId, page));
     }
+
+    @GetMapping("/home")
+    public String index() {
+        return "index";
+    }
 }
