@@ -11,7 +11,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -22,27 +24,26 @@ public class SecurtyConfig {
     private final RedisTemplate<String, String> redisTemplate;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable().httpBasic().disable().logout().logoutUrl("/1313131678979876545646")
-                .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests()
-                .antMatchers("/items").permitAll()
-                .antMatchers("/login").permitAll()
-                .antMatchers("/refresh").permitAll()
-                .antMatchers("/register").permitAll()
-                .antMatchers("/h2-console/**").permitAll()
-                .antMatchers("/").permitAll()
-                .antMatchers("/home").permitAll()
-                .antMatchers("/images/**").permitAll()
-                .antMatchers("/img/**").permitAll()
-                .antMatchers("/css/**").permitAll()
-                .antMatchers("/js/**").permitAll()
-                .antMatchers("/fonts/**").permitAll()
-                .antMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-                .and().headers().frameOptions().disable()
-                .and().addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider,redisTemplate),UsernamePasswordAuthenticationFilter.class);
+//        http.formLogin().loginPage("/login").defaultSuccessUrl("/")
+//                .usernameParameter("email").failureUrl("/login")
+//                        .and().logout().logoutUrl("/logout");
+
+        http.csrf().disable().httpBasic().disable() //.logout().logoutUrl("/1313131678979876545646")
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        http.authorizeRequests()
+                        .antMatchers("/", "/itemsv2", "/signup", "/login", "/register").permitAll()
+                        .antMatchers("/h2-console/**").permitAll()
+                        .antMatchers("/images/**", "/img/**", "/js/**", "/css/**", "/fonts/**").permitAll()
+                        .antMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
+                        .and().headers().frameOptions().disable()
+                        .and().addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider,redisTemplate),UsernamePasswordAuthenticationFilter.class);
+
+        // http.exceptionHandling()
+        //         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
+
+
         return http.build();
     }
     @Bean

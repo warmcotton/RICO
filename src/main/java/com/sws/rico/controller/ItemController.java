@@ -2,6 +2,7 @@ package com.sws.rico.controller;
 
 import com.sws.rico.dto.ItemDto;
 import com.sws.rico.exception.CustomException;
+import com.sws.rico.repository.ItemRepository;
 import com.sws.rico.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,6 +11,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
+    private final ItemRepository itemRepository;
 
     @ResponseBody
     @GetMapping("/items")
@@ -26,6 +29,13 @@ public class ItemController {
                                                   @RequestParam(value = "user", defaultValue = "") String user,
                                                   @PageableDefault(size=10) Pageable page) {
         return ResponseEntity.ok(itemService.getMainItemPage(item, user, page));
+    }
+
+    @ResponseBody
+    @GetMapping("/itemsv2")
+    public ResponseEntity<Page<ItemDto>> getItems(@RequestParam(value = "search", defaultValue = "") String search,
+                                                  @PageableDefault(size=6) Pageable page) {
+        return ResponseEntity.ok(itemService.getMainItemPagev2(search, page));
     }
 
     @ResponseBody
@@ -69,8 +79,10 @@ public class ItemController {
         return ResponseEntity.ok(itemService.getUserItemPage(userId, page));
     }
 
-    @GetMapping("/home")
-    public String index() {
+    @GetMapping("/")
+    public String index(Model model) {
+        model.addAttribute("bannerItemList", itemService.getItemBanner());
+        model.addAttribute("latestItemList", itemService.getLatestItem());
         return "index";
     }
 }

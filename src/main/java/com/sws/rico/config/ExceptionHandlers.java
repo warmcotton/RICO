@@ -10,6 +10,8 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -24,6 +26,12 @@ import java.util.NoSuchElementException;
 public class ExceptionHandlers extends ResponseEntityExceptionHandler {
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<Object> cartException(CustomException exception) {
+        log.info(exception.getMessage(),exception);
+        return ResponseEntity.status(400).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(UnexpectedRollbackException.class)
+    public ResponseEntity<Object> cartException(TransactionException exception) {
         log.info(exception.getMessage(),exception);
         return ResponseEntity.status(400).body(exception.getMessage());
     }

@@ -36,7 +36,7 @@ public class ItemDto {
         itemDto.setQuantity(i.getQuantity());
         itemDto.setItemStatus(i.getItemStatus());
         itemDto.setItemImgDtoList(itemImgDtoList.stream().map(ItemImgDto::getItemImgDto).collect(Collectors.toList()));
-        itemDto.setUser(i.getUser().getEmail());
+        itemDto.setUser(i.getUser().getName());
         return itemDto;
     }
 

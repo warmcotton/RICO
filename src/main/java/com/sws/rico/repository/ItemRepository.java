@@ -17,4 +17,11 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "inner join fetch User u on i.user.id = u.id " +
             "where u.name like concat('%', :name, '%') or i.name like concat('%', :user, '%')")
     Page<Item> findPageItem(String name, String user, Pageable pageable);
+
+    @Query(value = "select i from Item i " +
+            "inner join User u on i.user.id = u.id " +
+            "where lower(u.name) like lower(concat('%', :search, '%')) or lower(i.name) like lower(concat('%', :search, '%'))")
+    Page<Item> findPageItemv2(String search, Pageable pageable);
+
+    List<Item> findTop4ByOrderByCreatedAtDesc();
 }

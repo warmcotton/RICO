@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -57,16 +58,23 @@ public class UserService implements UserDetailsService {
                 .map(TokenUserDetails::new)
                 .orElseThrow(()->new UsernameNotFoundException("유저 존재 x"));
     }
-    //로그인
+
     public TokenInfo login(String email, String password) throws CustomException {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(email, password);
+
         try {
-            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(token);
+            User user = getUser(email);
+            if (!passwordEncoder.matches(password, user.getPassword())) throw new IllegalArgumentException("");
+            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(token); //inner transactianl exeption
             TokenInfo authenticated = jwtTokenProvider.generateToken(authentication);
             redisTemplate.opsForValue().set("RT:"+authenticated.getRefreshToken(),email,REFRESH_EXPIRES_TIME, TimeUnit.MILLISECONDS);
             return authenticated;
         } catch (AuthenticationException e) {
             throw new UserException("인증 오류");
+        } catch (NoSuchElementException e) {
+            throw new UserException("아이디 확인");
+        } catch (IllegalArgumentException e) {
+            throw new UserException("비밀번호 확인");
         }
     }
 

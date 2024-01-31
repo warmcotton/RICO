@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional
@@ -45,6 +48,11 @@ public class ItemService {
         return getItemDto(item.getId());
     }
 
+    public List<ItemDto> getItemBanner() {
+        List<Item> itemList = itemRepository.findTop4ByOrderByCreatedAtDesc();
+        return itemList.stream().map(item -> getItemDto(item.getId())).collect(toList());
+    }
+
     public Page<ItemDto> getMyItemPage(String email, Pageable page) {
         User user = userRepository.findByEmail(email).get();
         return getItemDtoPage("", user.getName(),page);
@@ -58,6 +66,11 @@ public class ItemService {
 
     public Page<ItemDto> getMainItemPage(String item, String user, Pageable page) {
         return getItemDtoPage(item,user,page);
+    }
+
+    public Page<ItemDto> getMainItemPagev2(String search, Pageable page) {
+
+        return getItemDtoPagev2(search ,page);
     }
 
     public ItemDto getItemDto(Long itemId) {
@@ -103,6 +116,11 @@ public class ItemService {
                 .map(pageItem -> ItemDto.getItemDto(pageItem, getItemImgs(pageItem)));
     }
 
+    private Page<ItemDto> getItemDtoPagev2(String search, Pageable page) {
+        return itemRepository.findPageItemv2(search, page)
+                .map(pageItem -> ItemDto.getItemDto(pageItem, getItemImgs(pageItem)));
+    }
+
     private Item getItem(Long id) {
         return itemRepository.findById(id).get();
     }
@@ -141,5 +159,10 @@ public class ItemService {
 
     private List<ItemImg> getItemImgs(Item i) {
         return itemImgRepository.findByItem(i);
+    }
+
+    public List<ItemDto> getLatestItem() {
+        List<Item> itemList = itemRepository.findTop4ByOrderByCreatedAtDesc();
+        return itemList.stream().map(item -> getItemDto(item.getId())).collect(toList());
     }
 }

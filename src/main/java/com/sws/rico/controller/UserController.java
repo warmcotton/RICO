@@ -5,12 +5,15 @@ import com.sws.rico.exception.CustomException;
 import com.sws.rico.service.UserService;
 import com.sws.rico.token.TokenInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
@@ -20,11 +23,40 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @ResponseBody
+    @GetMapping("/userinfo")
+    public String userPage(Authentication authentication) {
+        System.out.println(authentication);
+        return "user";
+    }
+
+    @GetMapping("/signup")
+    public String signUp() {
+        return "signup";
+    }
+
+//    @PostMapping("/signup")
+//    public String register(@RequestParam("name") String name, @RequestParam("email") String email,
+//                           @RequestParam("password") String password, @RequestParam("check") String check) throws CustomException {
+//        if(name.isEmpty() || email.isEmpty() || password.isEmpty() || check.isEmpty() || !check.equals(password)) throw new IllegalArgumentException("Invalid Arguments");
+//        return "redirect:/login";
+//    }
+
     @PostMapping("/login")
-    public TokenInfo login(@RequestBody HashMap<String, String> map) throws CustomException {
+    @ResponseBody
+    public ResponseEntity<?> login(@RequestBody HashMap<String, String> map, HttpServletResponse response) throws CustomException {
         if(map.get("email")==null || map.get("password")==null || map.get("email").isEmpty() || map.get("password").isEmpty()) throw new IllegalArgumentException("Invalid Arguments");
-        return userService.login(map.get("email"), map.get("password"));
+        TokenInfo token =  userService.login(map.get("email"), map.get("password"));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("grantType",token.getGrantType());
+        headers.add("accessToken",token.getAccessToken());
+        headers.add("refreshToken",token.getRefreshToken());
+
+        return ResponseEntity.status(200).headers(headers).build();
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
     }
 
     @ResponseBody
@@ -47,7 +79,10 @@ public class UserController {
     @PostMapping("/register")
     public UserDto register(@RequestBody HashMap<String, String> map) throws CustomException {
         if(map.get("email")==null || map.get("password")==null ||  map.get("name")==null || map.get("email").isEmpty()||
-                map.get("password").isEmpty() || map.get("name").isEmpty()  ) throw new IllegalArgumentException("Invalid Arguments");
+                map.get("password").isEmpty() || map.get("name").isEmpty()) {
+
+            throw new IllegalArgumentException("Invalid Arguments");
+        }
         return userService.registerNewUser(map.get("email"), map.get("password"), map.get("name"));
     }
 
