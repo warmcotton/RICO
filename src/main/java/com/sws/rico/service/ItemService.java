@@ -1,5 +1,6 @@
 package com.sws.rico.service;
 
+import com.sws.rico.constant.CategoryDto;
 import com.sws.rico.dto.ItemDto;
 import com.sws.rico.entity.*;
 import com.sws.rico.exception.CustomException;
@@ -18,10 +19,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
 @Service
 @Transactional
@@ -34,12 +36,20 @@ public class ItemService {
     private final OrderItemRepository orderItemRepository;
     private final DeletedItemRepository deletedItemRepository;
     private final CommonUserService commonUserService;
+    private final CategoryRepository categoryRepository;
     @Value("${img.location}") private String imgLocation;
 
     public ItemDto createItem(ItemDto itemDto, List<MultipartFile> imgList, String email) throws CustomException {
         User user = userRepository.findByEmail(email).get();
-        Item newItem = Item.getInstance(itemDto.getName(),itemDto.getPrice(), itemDto.getQuantity(),itemDto.getItemStatus(), user);
+        Item newItem = Item.getInstance(itemDto, user);
         Item item = itemRepository.save(newItem);
+
+        if(itemDto.getCategory().size() >0) {
+            Set<CategoryDto> categoryDto = itemDto.getCategory();
+            for (CategoryDto category: categoryDto) {
+                categoryRepository.save(CategoryWrapper.getInstance(category, item));
+            }
+        }
 
         if(imgList.size() > 0) {
             List<ItemImg> newItemImgList = saveImage(item, imgList);
@@ -69,23 +79,43 @@ public class ItemService {
     }
 
     public Page<ItemDto> getMainItemPagev2(String search, Pageable page) {
-
         return getItemDtoPagev2(search ,page);
+    }
+
+    public Page<ItemDto> getCategoryItem(CategoryDto category, Pageable page) {
+        Page<Item> tmp = itemRepository.findByCategory(category, page);
+        return tmp.map(pageItem -> ItemDto.getItemDto(pageItem, getCategorys(pageItem), getItemImgs(pageItem)));
     }
 
     public ItemDto getItemDto(Long itemId) {
         Item item = getItem(itemId);
         List<ItemImg> itemImgList = getItemImgs(item);
-        return ItemDto.getItemDto(item,itemImgList);
+        Set<CategoryWrapper> category = getCategorys(item);
+        return ItemDto.getItemDto(item,category,itemImgList);
+    }
+
+    private Set<CategoryWrapper> getCategorys(Item item) {
+        return categoryRepository.findAllByItem(item);
     }
 
     public ItemDto updateItem(Long id, ItemDto itemDto, List<MultipartFile> imgList, String email) throws CustomException {
         if(!commonUserService.checkUser(id, email)) throw new ItemException("상품 수정 권한 없음");
         Item item = getItem(id);
+
         item.setName(itemDto.getName());
         item.setPrice(itemDto.getPrice());
         item.setQuantity(itemDto.getQuantity());
         item.setItemStatus(itemDto.getItemStatus());
+        item.setBrief(itemDto.getBrief());
+        item.setDescription(item.getDescription());
+
+        if(itemDto.getCategory().size() >0) {
+            Set<CategoryDto> categoryDto = itemDto.getCategory();
+            for (CategoryDto category: categoryDto) {
+                categoryRepository.save(CategoryWrapper.getInstance(category, item));
+            }
+        }
+        categoryRepository.deleteAllByItem(item);
 
         if(imgList.size() > 0) {
             List<ItemImg> newItemImgList = saveImage(item, imgList);
@@ -113,12 +143,12 @@ public class ItemService {
 
     private Page<ItemDto> getItemDtoPage(String item, String user, Pageable page) {
         return itemRepository.findPageItem(item, user, page)
-                .map(pageItem -> ItemDto.getItemDto(pageItem, getItemImgs(pageItem)));
+                .map(pageItem -> ItemDto.getItemDto(pageItem, getCategorys(pageItem), getItemImgs(pageItem)));
     }
 
     private Page<ItemDto> getItemDtoPagev2(String search, Pageable page) {
         return itemRepository.findPageItemv2(search, page)
-                .map(pageItem -> ItemDto.getItemDto(pageItem, getItemImgs(pageItem)));
+                .map(pageItem -> ItemDto.getItemDto(pageItem,getCategorys(pageItem), getItemImgs(pageItem)));
     }
 
     private Item getItem(Long id) {
@@ -158,11 +188,13 @@ public class ItemService {
     }
 
     private List<ItemImg> getItemImgs(Item i) {
-        return itemImgRepository.findByItem(i);
+        return itemImgRepository.findAllByItem(i);
     }
 
     public List<ItemDto> getLatestItem() {
         List<Item> itemList = itemRepository.findTop4ByOrderByCreatedAtDesc();
         return itemList.stream().map(item -> getItemDto(item.getId())).collect(toList());
     }
+
+
 }

@@ -1,6 +1,7 @@
 package com.sws.rico.entity;
 
 import com.sws.rico.constant.ItemStatus;
+import com.sws.rico.dto.ItemDto;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -25,17 +26,23 @@ public class Item {
     private int quantity;
     @Enumerated(EnumType.STRING)
     private ItemStatus itemStatus;
+    @Column(nullable = false)
+    private String brief;
+    @Column(nullable = false)
+    private String description;
     @CreatedDate @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    public static Item getInstance(String name, int price, int quantity, ItemStatus itemStatus, User user) {
+    public static Item getInstance(ItemDto itemDto, User user) {
         Item item = new Item();
-        item.setName(name);
-        item.setPrice(price);
-        item.setQuantity(quantity);
-        item.setItemStatus(itemStatus);
+        item.setName(itemDto.getName());
+        item.setPrice(itemDto.getPrice());
+        item.setQuantity(itemDto.getQuantity());
+        item.setItemStatus(itemDto.getItemStatus());
+        item.setBrief(itemDto.getBrief());
+        item.setDescription(itemDto.getDescription());
         item.setUser(user);
         return item;
     }

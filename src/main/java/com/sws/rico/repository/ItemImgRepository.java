@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface ItemImgRepository extends JpaRepository<ItemImg, Long> {
     void deleteAllByItem(Item item);
-    List<ItemImg> findByItem(Item i);
+    List<ItemImg> findAllByItem(Item i);
 }

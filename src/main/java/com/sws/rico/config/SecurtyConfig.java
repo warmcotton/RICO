@@ -32,7 +32,7 @@ public class SecurtyConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests()
-                        .antMatchers("/", "/itemsv2", "/signup", "/login", "/register").permitAll()
+                        .antMatchers("/items","/items/category/**", "/itemsv2", "/signup", "/login", "/register").permitAll()
                         .antMatchers("/h2-console/**").permitAll()
                         .antMatchers("/images/**", "/img/**", "/js/**", "/css/**", "/fonts/**").permitAll()
                         .antMatchers("/admin/**").hasRole("ADMIN")
