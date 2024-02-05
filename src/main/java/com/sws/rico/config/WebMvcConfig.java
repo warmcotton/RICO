@@ -17,12 +17,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addResourceLocations(uploadPath);
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry
-                .addMapping("/**")
-                .allowedHeaders("*")
-                .allowedOrigins("http://192.168.219.108:5500", "http://localhost:3000")
-                .allowedMethods("*");
-    }
+//    @Override mvc의 cors설정 (security filter chain 앞에 cors필터 설정)
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry
+//                .addMapping("/**")
+//                .allowedHeaders("*")
+//                .allowedOrigins("http://localhost:3000")
+//                .allowedMethods("*");
+//    }
 }

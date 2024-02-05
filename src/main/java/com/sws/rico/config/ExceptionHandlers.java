@@ -16,13 +16,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.NoSuchElementException;
 
 @Slf4j
-@ControllerAdvice(assignableTypes = {CartController.class, OrderController.class, ItemController.class, UserController.class})
+@RestControllerAdvice(assignableTypes = {CartController.class, OrderController.class, ItemController.class, UserController.class})
 public class ExceptionHandlers extends ResponseEntityExceptionHandler {
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<Object> cartException(CustomException exception) {

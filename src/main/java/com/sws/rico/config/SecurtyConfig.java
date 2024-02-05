@@ -15,6 +15,9 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -22,32 +25,41 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurtyConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisTemplate<String, String> redisTemplate;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http.formLogin().loginPage("/login").defaultSuccessUrl("/")
-//                .usernameParameter("email").failureUrl("/login")
-//                        .and().logout().logoutUrl("/logout");
-
-        http.csrf().disable().httpBasic().disable() //.logout().logoutUrl("/1313131678979876545646")
+        http.csrf().disable().httpBasic().disable().formLogin().disable() //.logout().logoutUrl("/1313131678979876545646")
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
+        http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
+
         http.authorizeRequests()
-                        .antMatchers("/items","/items/category/**", "/itemsv2", "/signup", "/login", "/register").permitAll()
+                        .antMatchers("/items","/reviews/**","/item", "/items/category/**","/itemsv3" ,"/category","/itemsv2", "/signup", "/login", "/register").permitAll()
                         .antMatchers("/h2-console/**").permitAll()
                         .antMatchers("/images/**", "/img/**", "/js/**", "/css/**", "/fonts/**").permitAll()
                         .antMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                         .and().headers().frameOptions().disable()
-                        .and().addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider,redisTemplate),UsernamePasswordAuthenticationFilter.class);
-
-        // http.exceptionHandling()
-        //         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
-
+                        .and().addFilter(corsFilter())
+                        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider,redisTemplate),UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**",config);
+        return new CorsFilter(source);
     }
 }
