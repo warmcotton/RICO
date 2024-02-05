@@ -1,10 +1,15 @@
 package com.sws.rico.service;
 
 import com.sws.rico.constant.Role;
+import com.sws.rico.dto.ReviewDto;
 import com.sws.rico.dto.UserDto;
+import com.sws.rico.entity.Item;
+import com.sws.rico.entity.Review;
 import com.sws.rico.entity.User;
 import com.sws.rico.exception.CustomException;
 import com.sws.rico.exception.UserException;
+import com.sws.rico.repository.ItemRepository;
+import com.sws.rico.repository.ReviewRepository;
 import com.sws.rico.repository.UserRepository;
 import com.sws.rico.token.JwtTokenProvider;
 import com.sws.rico.token.TokenInfo;
@@ -26,13 +31,16 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
+    private final ItemRepository itemRepository;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
@@ -101,7 +109,7 @@ public class UserService implements UserDetailsService {
     }
     
     public List<UserDto> getUserDtoList() {
-        return userRepository.findAll().stream().map(user -> getUserDtoByEmail(user.getEmail())).collect(Collectors.toList());
+        return userRepository.findAll().stream().map(user -> getUserDtoByEmail(user.getEmail())).collect(toList());
     }
     //회원정보수정
     public UserDto update(UserDto userDto, String email) throws CustomException {
@@ -112,5 +120,23 @@ public class UserService implements UserDetailsService {
 
     public UserDto getUserDtoById(Long userId) {
         return UserDto.getUserDto(userRepository.findById(userId).get());
+    }
+
+    public List<ReviewDto> submitReview(ReviewDto reviewDto, String email) throws CustomException {
+        Item item = itemRepository.findById(reviewDto.getItemId()).get();
+        User user = getUser(email);
+
+        if(reviewRepository.findByItemAndUser(item, user).isPresent()) {
+            throw new UserException("이미 리뷰 작성함.");
+        }
+        Review review = Review.getInstance(item, user, reviewDto.getRating(), reviewDto.getReview());
+        reviewRepository.save(review);
+
+        return reviewRepository.findAll().stream().map(ReviewDto::getReviewDto).collect(toList());
+    }
+
+    public List<ReviewDto> getReview(Long itemId) {
+        Item item = itemRepository.findById(itemId).get();
+        return reviewRepository.findAllByItem(item).stream().map(ReviewDto::getReviewDto).collect(toList());
     }
 }

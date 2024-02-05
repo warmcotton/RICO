@@ -1,5 +1,7 @@
 package com.sws.rico.controller;
 
+import com.sws.rico.dto.ItemDto;
+import com.sws.rico.dto.ReviewDto;
 import com.sws.rico.dto.UserDto;
 import com.sws.rico.exception.CustomException;
 import com.sws.rico.service.UserService;
@@ -29,10 +31,10 @@ public class UserController {
         return "user";
     }
 
-    @GetMapping("/signup")
-    public String signUp() {
-        return "signup";
-    }
+//    @GetMapping("/signup")
+//    public String signUp() {
+//        return "signup";
+//    }
 
 //    @PostMapping("/signup")
 //    public String register(@RequestParam("name") String name, @RequestParam("email") String email,
@@ -47,6 +49,7 @@ public class UserController {
         if(map.get("email")==null || map.get("password")==null || map.get("email").isEmpty() || map.get("password").isEmpty()) throw new IllegalArgumentException("Invalid Arguments");
         TokenInfo token =  userService.login(map.get("email"), map.get("password"));
         HttpHeaders headers = new HttpHeaders();
+        headers.add("Access-Control-Expose-Headers", "*");
         headers.add("grantType",token.getGrantType());
         headers.add("accessToken",token.getAccessToken());
         headers.add("refreshToken",token.getRefreshToken());
@@ -54,10 +57,10 @@ public class UserController {
         return ResponseEntity.status(200).headers(headers).build();
     }
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
+//    @GetMapping("/login")
+//    public String login() {
+//        return "login";
+//    }
 
     @ResponseBody
     @GetMapping("/refresh")
@@ -84,6 +87,23 @@ public class UserController {
             throw new IllegalArgumentException("Invalid Arguments");
         }
         return userService.registerNewUser(map.get("email"), map.get("password"), map.get("name"));
+    }
+
+    @ResponseBody
+    @PostMapping("/review")
+    public ResponseEntity<List<ReviewDto>> submitReview(@RequestBody @Valid ReviewDto ReviewDto, Authentication authentication) throws CustomException {
+        List<ReviewDto> tmp = userService.submitReview(ReviewDto, authentication.getName());
+        return ResponseEntity.ok(tmp);
+    }
+
+    @ResponseBody
+    @GetMapping("/reviews/{itemId}")
+    public ResponseEntity<List<ReviewDto>> getReview(@PathVariable Long itemId) {
+        //num = 0,1,2,3,4 ....
+
+        List<ReviewDto> tmp = userService.getReview(itemId);
+
+        return ResponseEntity.ok(tmp);
     }
 
     @ResponseBody

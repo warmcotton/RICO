@@ -4,13 +4,19 @@ import com.sws.rico.constant.Role;
 import com.sws.rico.dto.UserDto;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
 @Getter @Setter
+@EntityListeners(AuditingEntityListener.class)
+
 public class User {
     @Id @Column(name = "user_id") @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +28,9 @@ public class User {
     private String name;
     @Enumerated(value = EnumType.STRING)
     private Role role;
-
+    @CreatedDate
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
     public static User getInstance(String email, String password, String name, PasswordEncoder passwordEncoder) {
         User newUser = new User();
         newUser.email = email;
