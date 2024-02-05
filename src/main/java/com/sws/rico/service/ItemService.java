@@ -17,12 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.transaction.Transactional;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
 @Service
@@ -45,7 +42,7 @@ public class ItemService {
         Item item = itemRepository.save(newItem);
 
         if(itemDto.getCategory().size() >0) {
-            Set<CategoryDto> categoryDto = itemDto.getCategory();
+            List<CategoryDto> categoryDto = itemDto.getCategory();
             for (CategoryDto category: categoryDto) {
                 categoryRepository.save(CategoryWrapper.getInstance(category, item));
             }
@@ -90,11 +87,11 @@ public class ItemService {
     public ItemDto getItemDto(Long itemId) {
         Item item = getItem(itemId);
         List<ItemImg> itemImgList = getItemImgs(item);
-        Set<CategoryWrapper> category = getCategorys(item);
+        List<CategoryWrapper> category = getCategorys(item);
         return ItemDto.getItemDto(item,category,itemImgList);
     }
 
-    private Set<CategoryWrapper> getCategorys(Item item) {
+    private List<CategoryWrapper> getCategorys(Item item) {
         return categoryRepository.findAllByItem(item);
     }
 
@@ -110,7 +107,7 @@ public class ItemService {
         item.setDescription(item.getDescription());
 
         if(itemDto.getCategory().size() >0) {
-            Set<CategoryDto> categoryDto = itemDto.getCategory();
+            List<CategoryDto> categoryDto = itemDto.getCategory();
             for (CategoryDto category: categoryDto) {
                 categoryRepository.save(CategoryWrapper.getInstance(category, item));
             }
@@ -197,4 +194,10 @@ public class ItemService {
     }
 
 
+    public Map<String, Long> getCategory() {
+        Map<String, Long> category = categoryRepository.findAll().stream().collect(groupingBy(res -> res.getCategory().toString(), counting()));
+        Long total = category.values().stream().reduce(0L, Long::sum);
+        category.put("total", total);
+        return category;
+    }
 }

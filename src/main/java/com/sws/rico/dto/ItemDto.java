@@ -12,6 +12,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,15 +37,15 @@ public class ItemDto {
     @NotEmpty
     @Size(min = 10, max = 2000)
     private String description;
-
-    private Set<CategoryDto> category;
+    @NotEmpty
+    private List<CategoryDto> category;
     private List<ItemImgDto> itemImgDtoList;
     private String user; //
 
-    public static ItemDto getItemDto(Item i, Set<CategoryWrapper> category, List<ItemImg> itemImgDtoList) {
+    public static ItemDto getItemDto(Item i, List<CategoryWrapper> category, List<ItemImg> itemImgDtoList) {
         ItemDto itemDto = new ItemDto();
 
-        Set<CategoryDto> categoryDtos = new HashSet<>();
+        List<CategoryDto> categoryDtos = new ArrayList<>();
         for(CategoryWrapper categoryWrapper : category) {
             categoryDtos.add(categoryWrapper.getCategory());
         }

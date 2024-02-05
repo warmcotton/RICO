@@ -19,12 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-    private final ItemRepository itemRepository;
 
     @ResponseBody
     @GetMapping("/items")
@@ -32,6 +32,12 @@ public class ItemController {
                                                   @RequestParam(value = "user", defaultValue = "") String user,
                                                   @PageableDefault(size=10) Pageable page) {
         return ResponseEntity.ok(itemService.getMainItemPage(item, user, page));
+    }
+
+    @ResponseBody
+    @GetMapping("/category")
+    public ResponseEntity<Map<String, Long>> getCategory() {
+        return ResponseEntity.ok(itemService.getCategory());
     }
 
     @ResponseBody
@@ -43,23 +49,26 @@ public class ItemController {
     }
 
     @ResponseBody
-    @GetMapping("/items/category/{category}")
-    public ResponseEntity<Page<ItemDto>> getItemsByCategory(@PathVariable CategoryDto category,
+    @GetMapping("/items/category")
+    public ResponseEntity<Page<ItemDto>> getItemsByCategory(@RequestParam(value = "category") CategoryDto category,
                                                   @PageableDefault(size=6, sort = "createdAt", direction = Sort.Direction.DESC) Pageable page) {
         return ResponseEntity.ok(itemService.getCategoryItem(category, page));
     }
 
 
     @ResponseBody
-    @GetMapping("/item/{itemId}")
-    public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId) {
+    @GetMapping("/item")
+    public ResponseEntity<ItemDto> getItem(@RequestParam(value = "itemid") Long itemId) {
         if(itemId<1) throw new IllegalArgumentException("Invalid Arguments");
         return ResponseEntity.ok(itemService.getItemDto(itemId));
     }
 
+
+
     @ResponseBody
     @PostMapping("/item")
     public ResponseEntity<ItemDto> saveItem(@RequestPart List<MultipartFile> itemFileList, @RequestPart @Valid ItemDto itemDto, Authentication authentication) throws CustomException {
+        //사진은 1개 이상 6개 이하 받도록 처리
         return ResponseEntity.ok(itemService.createItem(itemDto, itemFileList, authentication.getName()));
     }
 

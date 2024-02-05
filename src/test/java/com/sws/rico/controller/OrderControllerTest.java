@@ -59,27 +59,27 @@ public class OrderControllerTest {
 
     @BeforeEach
     void init() {
-        User user1 = User.getInstance("sws@sws","1111","sws",passwordEncoder);
-        User user2 = User.getInstance("jch@jch","1111","jch",passwordEncoder);
-
-        Item item1 = Item.getInstance("item1",50000,10, ItemStatus.FOR_SALE, user1);
-        Item item2 = Item.getInstance("item2",10000,5, ItemStatus.FOR_SALE, user2);
-
-        ItemImg itemImg1 = ItemImg.getInstance("random_image_id1", "original1.png", "/images/**", "Y", item1);
-        ItemImg itemImg2 = ItemImg.getInstance("random_image_id2", "original2.png", "/images/**", "N", item1);
-        ItemImg itemImg3 = ItemImg.getInstance("random_image_id3", "original3.png", "/images/**", "Y", item2);
-
-        Cart cart1 = Cart.getInstance(user1);
-        Cart cart2 = Cart.getInstance(user2);
-
-        CartItem cartItem1 = CartItem.getInstance(3, item1, cart2);
-        CartItem cartItem2 = CartItem.getInstance(2, item2, cart1);
-
-        userRepository.saveAll(asList(user1, user2));
-        itemRepository.saveAll(asList(item1, item2));
-        itemImgRepository.saveAll(asList(itemImg1, itemImg2, itemImg3));
-        cartRepository.saveAll(asList(cart1, cart2));
-        cartItemRepository.saveAll(asList(cartItem1, cartItem2));
+//        User user1 = User.getInstance("sws@sws","1111","sws",passwordEncoder);
+//        User user2 = User.getInstance("jch@jch","1111","jch",passwordEncoder);
+//
+//        Item item1 = Item.getInstance("item1",50000,10, ItemStatus.FOR_SALE, user1);
+//        Item item2 = Item.getInstance("item2",10000,5, ItemStatus.FOR_SALE, user2);
+//
+//        ItemImg itemImg1 = ItemImg.getInstance("random_image_id1", "original1.png", "/images/**", "Y", item1);
+//        ItemImg itemImg2 = ItemImg.getInstance("random_image_id2", "original2.png", "/images/**", "N", item1);
+//        ItemImg itemImg3 = ItemImg.getInstance("random_image_id3", "original3.png", "/images/**", "Y", item2);
+//
+//        Cart cart1 = Cart.getInstance(user1);
+//        Cart cart2 = Cart.getInstance(user2);
+//
+//        CartItem cartItem1 = CartItem.getInstance(3, item1, cart2);
+//        CartItem cartItem2 = CartItem.getInstance(2, item2, cart1);
+//
+//        userRepository.saveAll(asList(user1, user2));
+//        itemRepository.saveAll(asList(item1, item2));
+//        itemImgRepository.saveAll(asList(itemImg1, itemImg2, itemImg3));
+//        cartRepository.saveAll(asList(cart1, cart2));
+//        cartItemRepository.saveAll(asList(cartItem1, cartItem2));
     }
 
 

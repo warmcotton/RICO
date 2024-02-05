@@ -24,10 +24,7 @@ public class ItemImgDto {
     @Override
     public String toString() {
         return "ItemImgDto{" +
-                "id=" + id +
-                ", imgName='" + imgName + '\'' +
-                ", oriImgName='" + oriImgName + '\'' +
-                ", imgUrl='" + imgUrl + '\'' +
+                "imgUrl='" + imgUrl + '\'' +
                 ", repimgYn='" + repimgYn + '\'' +
                 '}';
     }
