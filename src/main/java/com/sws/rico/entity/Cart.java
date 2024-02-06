@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class Cart {
     @Id @Column(name = "cart_id") @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id") @OneToOne(fetch = FetchType.LAZY)
     private User user;
     @CreatedDate
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")

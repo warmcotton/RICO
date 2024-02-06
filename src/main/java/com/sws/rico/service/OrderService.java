@@ -41,6 +41,20 @@ public class OrderService {
         return orderCart(Arrays.asList(cartId), email);
     }
 
+    public OrderDto orderItemv2(Long itemId, int count, String email) throws CustomException {
+        if (!commonItemService.checkAndReduce(itemId, count)) throw new ItemException("수량 없음");
+        Item item = itemRepository.findById(itemId).get();
+        if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("판매중 아님");
+        if(item.getUser().getEmail().equals(email)) throw new OrderException("본인이 판매하는 상품 주문 x");
+
+        User user = userRepository.findByEmail(email).get();
+        Order newOrder = orderRepository.save(Order.getInstance(user, OrderStatus.ORDER));
+        orderItemRepository.save(OrderItem.getInstance(item,newOrder, count, item.getPrice()));
+        newOrder.setPrice(item.getPrice() * count);
+        List<OrderItem> orderItemList = getOrderItems(newOrder);
+        return OrderDto.getOrderDto(newOrder, orderItemList);
+    }
+
     public OrderDto orderCart(List<Long> cartIdList, String email) throws CustomException {
         List<Cart> checkedCartList = checkCartItems(cartIdList);
         User user = userRepository.findByEmail(email).get();
@@ -67,6 +81,30 @@ public class OrderService {
         return OrderDto.getOrderDto(newOrder, orderItemList);
     }
 
+    public OrderDto orderCartv2(Long cartId, String email) throws CustomException {
+        Cart cart = checkCartItems(cartId);
+        User user = userRepository.findByEmail(email).get();
+        Order newOrder = orderRepository.save(Order.getInstance(user, OrderStatus.ORDER));
+        int total = 0;
+
+        List<CartItem> cartItem = cartItemRepository.findByCart(cart);
+
+        for (CartItem cit : cartItem) {
+            Item item = cit.getItem();
+            if(item.getUser().getEmail().equals(email)) throw new OrderException("본인이 판매하는 상품 주문 x");
+
+            int price = item.getPrice()*cit.getCount();
+            total += price;
+            OrderItem newOrderItem = OrderItem.getInstance(item,newOrder,cit.getCount(),price);
+            orderItemRepository.save(newOrderItem);
+            cartItemRepository.delete(cit);
+        }
+        cartRepository.delete(cart);
+        newOrder.setPrice(total);
+        List<OrderItem> orderItemList = getOrderItems(newOrder);
+        return OrderDto.getOrderDto(newOrder, orderItemList);
+    }
+
     public Order getOrder(Long id) {
         return orderRepository.findById(id).get();
     }
@@ -83,7 +121,7 @@ public class OrderService {
     }
 
     public void cancel(Long orderId, String email) throws CustomException {
-        if(!commonUserService.checkUser(orderId, email)) throw new OrderException("접근 권한 없음");
+        if(!commonUserService.validateUserOrder(orderId, email)) throw new OrderException("접근 권한 없음");
         Order order = getOrder(orderId);
         if(order.getStatus()== OrderStatus.CANCEL) throw new OrderException("이미 취소됨");
         else if (order.getStatus() == OrderStatus.COMPLETE) throw new OrderException("배송 완료됨");
@@ -129,11 +167,11 @@ public class OrderService {
     private List<Cart> checkCartItems(List<Long> cartIdList) throws CustomException {
         List<Cart> cartList_ = new ArrayList<>();
 
-        for(Long cartid : cartIdList) {
+        for (Long cartid : cartIdList) {
             Cart cart = cartRepository.findById(cartid).get();
             List<CartItem> cartItems = cartItemRepository.findByCart(cart);
             if (cartItems.size() == 0) throw new OrderException("최소 1개 이상의 상품 주문");
-            for (CartItem cartItem: cartItems) {
+            for (CartItem cartItem : cartItems) {
                 if (!commonItemService.checkAndReduce(cartItem.getItem().getId(), cartItem.getCount()))
                     throw new ItemException("수량 없음");
             }
@@ -142,4 +180,17 @@ public class OrderService {
 
         return cartList_;
     }
+
+    private Cart checkCartItems(Long cartId) throws CustomException {
+        Cart cart = cartRepository.findById(cartId).get();
+        List<CartItem> cartItems = cartItemRepository.findByCart(cart);
+        if (cartItems.size() == 0) throw new OrderException("최소 1개 이상의 상품 주문");
+        for (CartItem cartItem : cartItems) {
+            if (!commonItemService.checkAndReduce(cartItem.getItem().getId(), cartItem.getCount()))
+                throw new ItemException("수량 없음");
+        }
+        return cart;
+    }
+
+
 }

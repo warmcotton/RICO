@@ -14,20 +14,10 @@ import java.util.stream.Collectors;
 
 @Getter @Setter
 public class CartDto {
-    @NotNull
     private Long id;
     private LocalDateTime date;
-    @Size(min = 1)
-    private List<@Valid CartItemDto> cartItemDto;
+    private List<CartItemDto> cartItemDto;
     private String user;
-    public static CartDto getCartDto(Cart c, List<CartItem> cartItemList) {
-        CartDto cartDto = new CartDto();
-        cartDto.setId(c.getId());
-        cartDto.setDate(c.getCreatedAt());
-        cartDto.setCartItemDto(cartItemList.stream().map(CartItemDto::getInstance).collect(Collectors.toList()));
-        cartDto.setUser(c.getUser().getEmail());
-        return cartDto;
-    }
 
     @Override
     public String toString() {
