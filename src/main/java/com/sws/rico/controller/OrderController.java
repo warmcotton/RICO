@@ -64,10 +64,9 @@ public class OrderController {
 //    }
 
     @ResponseBody
-    @GetMapping("/cart/order/{cartId}")
-    public ResponseEntity<OrderDto> orderCart_v3(@PathVariable Long cartId, Authentication authentication) throws CustomException {
-        if (cartId < 1) throw new IllegalArgumentException("Invalid Arguments");
-        return ResponseEntity.ok(orderService.orderCartv2(cartId, authentication.getName()));
+    @GetMapping("/order/cart")
+    public ResponseEntity<OrderDto> orderCart_v3(Authentication authentication) throws CustomException {
+        return ResponseEntity.ok(orderService.orderCartv2(authentication.getName()));
     }
 
     @ResponseBody
