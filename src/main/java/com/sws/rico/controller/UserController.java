@@ -4,6 +4,7 @@ import com.sws.rico.dto.ItemDto;
 import com.sws.rico.dto.ReviewDto;
 import com.sws.rico.dto.UserDto;
 import com.sws.rico.exception.CustomException;
+import com.sws.rico.service.CommonUserService;
 import com.sws.rico.service.UserService;
 import com.sws.rico.token.TokenInfo;
 import lombok.RequiredArgsConstructor;
@@ -20,16 +21,11 @@ import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-
-    @GetMapping("/userinfo")
-    public String userPage(Authentication authentication) {
-        System.out.println(authentication);
-        return "user";
-    }
+    private final CommonUserService commonUserService;
 
 //    @GetMapping("/signup")
 //    public String signUp() {
@@ -44,7 +40,6 @@ public class UserController {
 //    }
 
     @PostMapping("/login")
-    @ResponseBody
     public ResponseEntity<?> login(@RequestBody HashMap<String, String> map, HttpServletResponse response) throws CustomException {
         if(map.get("email")==null || map.get("password")==null || map.get("email").isEmpty() || map.get("password").isEmpty()) throw new IllegalArgumentException("Invalid Arguments");
         TokenInfo token =  userService.login(map.get("email"), map.get("password"));
@@ -62,7 +57,6 @@ public class UserController {
 //        return "login";
 //    }
 
-    @ResponseBody
     @GetMapping("/refresh")
     public TokenInfo refresh(@RequestHeader("Authorization") String token) throws CustomException {
         token = getToken(token);
@@ -78,27 +72,30 @@ public class UserController {
         return ResponseEntity.status(200).build();
     }
 
-    @ResponseBody
     @PostMapping("/register")
     public UserDto register(@RequestBody HashMap<String, String> map) throws CustomException {
-        if(map.get("email")==null || map.get("password")==null ||  map.get("name")==null || map.get("email").isEmpty()||
-                map.get("password").isEmpty() || map.get("name").isEmpty()) {
-
+        String email; String password; String name;
+        try {
+            email = map.get("email");
+            password = map.get("password");
+            name = map.get("name");
+        } catch (NullPointerException e) {
             throw new IllegalArgumentException("Invalid Arguments");
         }
-        return userService.registerNewUser(map.get("email"), map.get("password"), map.get("name"));
+        if (!email.matches("^[a-zA-Z0-9]{2,20}+@[0-9a-zA-Z]+\\.[a-z]+$")
+                || !password.matches("^[a-zA-Z0-9!@#$]{8,20}$") || !name.matches("^[^\\s]{2,20}$"))
+            throw new IllegalArgumentException("Invalid Arguments");
+        return userService.registerNewUser(email,password,name);
     }
 
-    @ResponseBody
     @PostMapping("/review")
     public ResponseEntity<List<ReviewDto>> submitReview(@RequestBody @Valid ReviewDto ReviewDto, Authentication authentication) throws CustomException {
         List<ReviewDto> tmp = userService.submitReview(ReviewDto, authentication.getName());
         return ResponseEntity.ok(tmp);
     }
 
-    @ResponseBody
     @GetMapping("/reviews/{itemId}")
-    public ResponseEntity<List<ReviewDto>> getReview(@PathVariable Long itemId) {
+    public ResponseEntity<List<ReviewDto>> getReview(@PathVariable Long itemId) throws CustomException {
         //num = 0,1,2,3,4 ....
 
         List<ReviewDto> tmp = userService.getReview(itemId);
@@ -106,28 +103,24 @@ public class UserController {
         return ResponseEntity.ok(tmp);
     }
 
-    @ResponseBody
     @GetMapping("/user")
-    public UserDto user(Authentication authentication) {
-        return userService.getUserDtoByEmail(authentication.getName());
+    public UserDto user(Authentication authentication) throws CustomException {
+        return commonUserService.getUserDtoByEmail(authentication.getName());
     }
 
-    @ResponseBody
     @PutMapping("/user")
     public UserDto update(@RequestBody @Valid UserDto userDto, Authentication authentication) throws CustomException {
         return userService.update(userDto, authentication.getName());
     }
 
-    @ResponseBody
     @GetMapping("/user/{userId}")
-    public UserDto user(@PathVariable Long userId) {
+    public UserDto user(@PathVariable Long userId) throws CustomException {
         if(userId<1) throw new IllegalArgumentException("Invalid Arguments");
         return userService.getUserDtoById(userId);
     }
 
-    @ResponseBody
     @GetMapping("/users")
-    public List<UserDto> getUsers() {
+    public List<UserDto> getUsers() throws CustomException {
         return userService.getUserDtoList();
     }
 
@@ -138,5 +131,4 @@ public class UserController {
         return token;
     }
 
-    //deleteUsers
 }

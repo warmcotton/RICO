@@ -2,22 +2,16 @@ package com.sws.rico.controller;
 
 import com.sws.rico.dto.CartDto;
 import com.sws.rico.dto.CartItemDto;
-import com.sws.rico.exception.CartException;
 import com.sws.rico.exception.CustomException;
 import com.sws.rico.service.CartService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
@@ -28,9 +22,8 @@ public class CartController {
 //        return ResponseEntity.ok(cartService.getMyCartPage(authentication.getName(), page));
 //    }
 
-    @ResponseBody
     @GetMapping("/cart")
-    public ResponseEntity<CartDto> getmyCart(Authentication authentication) {
+    public ResponseEntity<CartDto> getCart(Authentication authentication) throws CustomException {
         return ResponseEntity.ok(cartService.getMyCart(authentication.getName()));
     }
 
@@ -48,9 +41,8 @@ public class CartController {
 //        return ResponseEntity.ok(cartService.getCartItemDto(cartItemId, authentication.getName()));
 //    }
 
-    @ResponseBody
-    @PostMapping ("/cart/create")
-    public ResponseEntity<CartDto> createCart(Authentication authentication) throws CartException {
+    @PostMapping ("/create/cart")
+    public ResponseEntity<CartDto> createCart(Authentication authentication) throws CustomException {
         return ResponseEntity.ok(cartService.createCart(authentication.getName()));
     }
 
@@ -68,18 +60,17 @@ public class CartController {
 //        return ResponseEntity.ok(cartService.addItemToCart(itemId, quantity, cartId, authentication.getName()));
 //    }
 
-    @ResponseBody
-    @PostMapping("/cart/add")
+    @PostMapping("/cart")
     public ResponseEntity<CartDto> addItemv2(@RequestBody Map<String, String> item, Authentication authentication) throws CustomException {
-        Long itemId; Integer quantity;
+        Long itemId; Integer count;
         try {
-            itemId = Long.parseLong(item.get("itemId"));
-            quantity = Integer.parseInt(item.get("quantity"));
+            itemId = Long.parseLong(item.get("item_id"));
+            count = Integer.parseInt(item.get("count"));
         } catch (ClassCastException | NullPointerException | NumberFormatException exception) {
             throw new IllegalArgumentException("Invalid Arguments");
         }
-        if(itemId < 1 || quantity < 1) throw new IllegalArgumentException("Invalid Arguments");
-        return ResponseEntity.ok(cartService.addItemToCartv2(itemId, quantity, authentication.getName()));
+        if(itemId < 1 || count < 1) throw new IllegalArgumentException("Invalid Arguments");
+        return ResponseEntity.ok(cartService.addItemToCart(itemId, count, authentication.getName()));
     }
 
 //    @ResponseBody
@@ -89,30 +80,29 @@ public class CartController {
 //        return ResponseEntity.ok(cartService.changeCartItemQuantity(cartItemId, count, authentication.getName()));
 //    }
 
-    @ResponseBody
     @PutMapping("/cart")
-    public ResponseEntity<CartItemDto> updateCartItem(@RequestBody Map<String, String> cartItem, Authentication authentication) throws CustomException {
-        Long cartItemId; Integer count;
+    public ResponseEntity<CartItemDto> updateCartItem(@RequestBody Map<String, String> update, Authentication authentication) throws CustomException {
+        Long itemId; Integer count;
         try {
-            cartItemId = Long.parseLong(cartItem.get("cart_item_id"));
-            count = Integer.parseInt(cartItem.get("count"));
+            itemId = Long.parseLong(update.get("item_id"));
+            count = Integer.parseInt(update.get("count"));
         } catch (ClassCastException | NullPointerException | NumberFormatException exception) {
             throw new IllegalArgumentException("Invalid Arguments");
         }
-        return ResponseEntity.ok(cartService.changeCartItemQuantity(cartItemId, count, authentication.getName()));
+        if(itemId < 1 || count < 1) throw new IllegalArgumentException("Invalid Arguments");
+        return ResponseEntity.ok(cartService.changeCartItemQuantity(itemId, count, authentication.getName()));
     }
 
-    @DeleteMapping("/cart/{cartId}")
-    public ResponseEntity<?> deleteCart(@PathVariable Long cartId, Authentication authentication) throws CustomException {
-        if(cartId<1) throw new IllegalArgumentException("Invalid Arguments");
-        cartService.deleteCart(cartId, authentication.getName());
+    @DeleteMapping("/cart")
+    public ResponseEntity<?> deleteCart(Authentication authentication) throws CustomException {
+        cartService.deleteCart(authentication.getName());
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/cartItem/{cartItemId}")
-    public ResponseEntity<?> deleteCartItem(@PathVariable Long cartItemId, Authentication authentication) throws CustomException {
-        if(cartItemId<1) throw new IllegalArgumentException("Invalid Arguments");
-        cartService.deleteCartItem(cartItemId, authentication.getName());
+    @DeleteMapping("/cartItem/{itemId}")
+    public ResponseEntity<?> deleteCartItem(@PathVariable Long itemId, Authentication authentication) throws CustomException {
+        if(itemId < 1 ) throw new IllegalArgumentException("Invalid Arguments");
+        cartService.deleteCartItem(itemId, authentication.getName());
         return ResponseEntity.ok().build();
     }
 }

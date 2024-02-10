@@ -4,19 +4,13 @@ import com.sws.rico.dto.OrderDto;
 import com.sws.rico.exception.CustomException;
 import com.sws.rico.service.OrderService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
@@ -29,7 +23,6 @@ public class OrderController {
 //        return ResponseEntity.ok(orderDto);
 //    }
 
-    @ResponseBody
     @PostMapping ("/order/item")
     public ResponseEntity<OrderDto> orderItemv3(@RequestBody Map<String, String> order, Authentication authentication) throws CustomException {
         Long itemId; Integer count;
@@ -40,7 +33,7 @@ public class OrderController {
             throw new IllegalArgumentException("invalid Arguments");
         }
 
-        return ResponseEntity.ok(orderService.orderItemv2(itemId, count, authentication.getName()));
+        return ResponseEntity.ok(orderService.orderItem(itemId, count, authentication.getName()));
     }
 
 //    @ResponseBody
@@ -63,19 +56,23 @@ public class OrderController {
 //        return ResponseEntity.ok(orderService.orderCart(orderList, authentication.getName()));
 //    }
 
-    @ResponseBody
     @GetMapping("/order/cart")
     public ResponseEntity<OrderDto> orderCart_v3(Authentication authentication) throws CustomException {
         return ResponseEntity.ok(orderService.orderCartv2(authentication.getName()));
     }
 
-    @ResponseBody
     @GetMapping("/orders")
-    public ResponseEntity<Page<OrderDto>> getOrders(Authentication authentication, @PageableDefault(size = 10) Pageable page) {
-        return ResponseEntity.ok(orderService.getOrderDtoPage(authentication.getName(), page));
+    public ResponseEntity<List<OrderDto>> getOrders(Authentication authentication) throws CustomException {
+        return ResponseEntity.ok(orderService.getOrderDtoPage(authentication.getName()));
+    }
+    
+    @GetMapping("/order/{orderId}")
+    public ResponseEntity<OrderDto> getOrder(@PathVariable Long orderId, Authentication authentication) throws CustomException {
+        if(orderId < 1) throw new IllegalArgumentException("Invalid Arguments");
+        return ResponseEntity.ok(orderService.getOrderDto(orderId, authentication.getName()));
     }
 
-    @GetMapping("/order/{orderId}/cancel/v2")
+    @GetMapping("/order/{orderId}/cancel")
     public ResponseEntity<?> cancel_v2(@PathVariable Long orderId, Authentication authentication) throws CustomException {
         if(orderId < 1) throw new IllegalArgumentException("Invalid Arguments");
         orderService.cancel(orderId, authentication.getName());

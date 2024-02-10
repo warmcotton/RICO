@@ -7,14 +7,13 @@ import com.sws.rico.entity.*;
 import com.sws.rico.exception.CartException;
 import com.sws.rico.exception.CustomException;
 import com.sws.rico.exception.ItemException;
+import com.sws.rico.exception.UserException;
 import com.sws.rico.repository.CartItemRepository;
 import com.sws.rico.repository.CartRepository;
 import com.sws.rico.repository.ItemRepository;
 import com.sws.rico.repository.UserRepository;
 import com.sws.rico.repository.ItemImgRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -23,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@Transactional(rollbackOn = {CustomException.class})
 @RequiredArgsConstructor
 public class CartService {
     private final CartRepository cartRepository;
@@ -32,12 +31,87 @@ public class CartService {
     private final ItemRepository itemRepository;
     private final ItemImgRepository itemImgRepository;
     private final CommonUserService commonUserService;
+    private final CommonCartService commonCartService;
 
-    public CartDto createCart(String email) throws CartException {
-        User user = userRepository.findByEmail(email).get();
-        if(cartRepository.findByUser(user).isPresent()) throw new CartException("카트가 이미 생성됨");
-        return getCartDto(createCartByEmail(email),new ArrayList<>());
+    public CartDto createCart(String email) throws CustomException {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
+        if(cartRepository.findByUser(user).isPresent()) throw new CartException("장바구니가 이미 생성되었습니다.");
+        Cart cart = cartRepository.save(Cart.getInstance(user));
+        return commonCartService.getCartDto(cart,new ArrayList<>());
     }
+
+    public CartDto addItemToCart(Long itemId, int quantity, String email) throws CustomException {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
+        Cart cart = cartRepository.findByUser(user)
+                .orElseGet(() -> cartRepository.save(Cart.getInstance(user)));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new ItemException("상품 정보가 없습니다."));
+
+        if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("상품 판매중이 아닙니다.");
+        if(item.getUser().getEmail().equals(email)) throw new CartException("본인이 판매하는 상품은 주문할 수 없습니다.");
+        List<Long> itemIdList = cartItemRepository.findByCart(cart).stream().map(ct -> ct.getItem().getId()).collect(Collectors.toList());
+        if(itemIdList.contains(itemId)) throw new CartException("이미 추가된 상품입니다.");
+
+        CartItem cartItem = CartItem.getInstance(quantity, item, cart);
+        cartItemRepository.save(cartItem);
+        List<CartItem> cartItems = cartItemRepository.findByCart(cart);
+
+        return commonCartService.getCartDto(cart, cartItems);
+    }
+
+    public CartDto getMyCart(String email) throws CustomException {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
+        if (cartRepository.findByUser(user).isEmpty()) return null;
+        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new CartException("장바구니 정보가 없습니다."));
+        List<CartItem> cartItems = commonCartService.getCartItemsByCartId(cart.getId());
+        return commonCartService.getCartDto(cart, cartItems);
+    }
+
+    public CartItemDto changeCartItemQuantity(Long itemId, int count, String email) throws CustomException {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
+        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new CartException("장바구니 정보가 없습니다."));
+        CartItem cartItem = null;
+
+        for(CartItem rt : cartItemRepository.findByCart(cart)) {
+            if (rt.getItem().getId() == itemId) {
+                cartItem = rt;
+            }
+        }
+        if (cartItem == null) {
+            throw new CartException("장바구니에 해당 상품이 없습니다.");
+        }
+        cartItem.setCount(count);
+        return CartItemDto.getInstance(cartItem, itemImgRepository.findAllByItem(cartItem.getItem()));
+    }
+
+    public void deleteCartItem(Long itemId, String email) throws CustomException {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
+        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new CartException("장바구니 정보가 없습니다."));
+
+        CartItem cartItem = null;
+        for(CartItem rt : cartItemRepository.findByCart(cart)) {
+            if (rt.getItem().getId() == itemId) {
+                cartItem = rt;
+            }
+        }
+        if (cartItem == null) {
+            throw new CartException("장바구니에 상품이 없습니다.");
+        }
+        cartItemRepository.deleteById(cartItem.getId());
+    }
+
+    public void deleteCart(String email) throws CustomException {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
+        Cart cart =cartRepository.findByUser(user).orElseThrow(() -> new CartException("장바구니 정보가 없습니다."));
+
+        cartItemRepository.deleteAllByCart(cart);
+        cartRepository.deleteById(cart.getId());
+    }
+
+
+
+//    private Cart getCart(Long id) {
+//        return cartRepository.findById(id).get();
+//    }
 
 //    public CartDto addItemToCart(Long itemId, int quantity, Long cartId, String email) throws CustomException {
 //        if(!commonUserService.validateUserCart(cartId, email)) throw new CartException("카트 접근 권한 없음");
@@ -54,20 +128,10 @@ public class CartService {
 //        return getCartDto(cart, getCartItemsByCartId(cartId));
 //    }
 
-    public CartDto addItemToCartv2(Long itemId, int quantity, String email) throws CustomException {
-        User user = userRepository.findByEmail(email).get();
-        Cart cart = cartRepository.findByUser(user).get();
-        Item item = itemRepository.findById(itemId).get();
-
-        if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("판매중 아님");
-        if(item.getUser().getEmail().equals(email)) throw new CartException("본인이 판매하는 상품 주문 x");
-        List<Long> itemIdList = cartItemRepository.findByCart(cart).stream().map(ct -> ct.getItem().getId()).collect(Collectors.toList());
-        if(itemIdList.contains(itemId)) throw new CartException("이미 추가된 상품입니다.");
-
-        CartItem cartItem = CartItem.getInstance(quantity, item, cart);
-        cartItemRepository.save(cartItem);
-        return getCartDto(cart, getCartItemsByCartId(cart.getId()));
-    }
+//    private Cart createCartByEmail(String email) {
+//        User user = userRepository.findByEmail(email).get();
+//        return cartRepository.save(Cart.getInstance(user));
+//    }
 
 //    public CartItemDto getCartItemDto(Long cartItemId, String email) throws CustomException {
 //        CartItem cartItem = cartItemRepository.findById(cartItemId).get();
@@ -88,65 +152,4 @@ public class CartService {
 //                .map(cart -> getCartDto(cart, getCartItemsByCartId(cart.getId())));
 //    }
 
-    public CartDto getMyCart(String email) {
-        User user = userRepository.findByEmail(email).get();
-        Cart cart = cartRepository.findByUser(user).get();
-        List<CartItem> cartItems = getCartItemsByCartId(cart.getId());
-        return getCartDto(cart, cartItems);
-    }
-
-    public CartItemDto changeCartItemQuantity(Long itemId, int count, String email) throws CustomException {
-        User user = userRepository.findByEmail(email).get();
-        Cart cart = cartRepository.findByUser(user).get();
-
-        if(!commonUserService.validateUserCart(cart.getId(), email)) throw new CartException("카트 접근 권한 없음");
-        List<Long> itemIdList = cartItemRepository.findByCart(cart).stream()
-                .map(cartItem_ -> cartItem_.getItem().getId()).collect(Collectors.toList());
-        if (!itemIdList.contains(itemId)) throw new CartException("카트에 상품 없음");
-
-        CartItem cartItem = cartItemRepository.findById(itemIdList.get(itemIdList.indexOf(itemId))).get();
-        cartItem.setCount(count);
-        return CartItemDto.getInstance(cartItem, getItemImgs(cartItem.getItem()));
-    }
-
-    public void deleteCartItem(Long cartItemId, String email) throws CustomException {
-        CartItem cartItem = cartItemRepository.findById(cartItemId).get();
-        Cart cart = cartItem.getCart();
-        if(!commonUserService.validateUserCart(cart.getId(), email)) throw new CartException("카트 접근 권한 없음");
-        cartItemRepository.deleteById(cartItemId);
-    }
-
-    public void deleteCart(Long id, String email) throws CustomException {
-        if(!commonUserService.validateUserCart(id, email)) throw new CartException("카트 접근 권한 없음");
-        Cart cart = getCart(id);
-        cartItemRepository.deleteAllByCart(cart);
-        cartRepository.deleteById(id);
-    }
-
-    private Cart createCartByEmail(String email) {
-        User user = userRepository.findByEmail(email).get();
-        return cartRepository.save(Cart.getInstance(user));
-    }
-
-    private List<CartItem> getCartItemsByCartId(Long cartId) {
-        Cart cart = getCart(cartId);
-        List<CartItem> cartItemList = cartItemRepository.findByCart(cart);
-        return cartItemList;
-    }
-
-    private Cart getCart(Long id) {
-        return cartRepository.findById(id).get();
-    }
-
-    private List<ItemImg> getItemImgs(Item i) {
-        return itemImgRepository.findAllByItem(i);
-    }
-
-    private CartDto getCartDto(Cart c, List<CartItem> cartItemList) {
-        CartDto cartDto = new CartDto();
-        cartDto.setDate(c.getCreatedAt());
-        cartDto.setCartItemDto(cartItemList.stream().map(cartItem -> CartItemDto.getInstance(cartItem, getItemImgs(cartItem.getItem()))).collect(Collectors.toList()));
-        cartDto.setUser(c.getUser().getEmail());
-        return cartDto;
-    }
 }
