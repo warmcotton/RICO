@@ -22,3 +22,17 @@ Spring Boot를 이용하여 개발한 의류 이커머스 웹사이트
 
 #### 주문취소
 #### 주문조회
+
+### 개발 환경
+#### language
+- `Java 11`
+- `JavaScript`
+#### framework
+- `Spring Boot 2.7.17`
+- `Express.js`
+#### database
+- `MySQL`
+- `h2`
+#### etc
+- `jpa`
+- `redis`
