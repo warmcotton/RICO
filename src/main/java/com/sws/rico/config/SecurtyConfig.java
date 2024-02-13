@@ -32,17 +32,18 @@ public class SecurtyConfig {
         http.csrf().disable().httpBasic().disable().formLogin().disable() //.logout().logoutUrl("/1313131678979876545646")
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
+
 
         http.authorizeRequests()
-                        .antMatchers("/items","/reviews/**","/item", "/items/category/**","/itemsv3" ,"/category","/itemsv2", "/signup", "/login", "/register").permitAll()
-                        .antMatchers("/h2-console/**").permitAll()
+                        .antMatchers("/items/**","/reviews/**","/item/**","/category","/login", "/register").permitAll()
                         .antMatchers("/images/**", "/img/**", "/js/**", "/css/**", "/fonts/**").permitAll()
                         .antMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                         .and().headers().frameOptions().disable()
                         .and().addFilter(corsFilter())
                         .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider,redisTemplate),UsernamePasswordAuthenticationFilter.class);
+
+        http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(customAccessDeniedHandler);
 
         return http.build();
     }
@@ -57,6 +58,7 @@ public class SecurtyConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedOrigin("http://192.168.219.108:3000");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**",config);

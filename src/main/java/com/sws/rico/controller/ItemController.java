@@ -46,6 +46,22 @@ public class ItemController {
         return ResponseEntity.ok(itemService.getMainItemPage(search, page));
     }
 
+    @GetMapping("/items/banner")
+    public ResponseEntity<List<ItemDto>> getBanner() throws CustomException {
+        return ResponseEntity.ok(itemService.getItemBanner());
+    }
+
+    @GetMapping("/items/latest")
+    public ResponseEntity<List<ItemDto>> getLatest() throws CustomException {
+        return ResponseEntity.ok(itemService.getLatestItem());
+    }
+
+    @GetMapping("/items/popular")
+    public ResponseEntity<List<ItemDto>> getPopular() throws CustomException {
+        return ResponseEntity.ok(itemService.getPopularItem());
+    }
+
+
     @GetMapping("/items/category")
     public ResponseEntity<Page<ItemDto>> getItemsByCategory(@RequestParam(value = "category") CategoryDto category,
                                                   @PageableDefault(size=6, sort = "createdAt", direction = Sort.Direction.DESC) Pageable page) {

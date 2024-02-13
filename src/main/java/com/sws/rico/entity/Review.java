@@ -27,11 +27,11 @@ public class Review {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     @Column(nullable = false)
-    private int rating;
+    private double rating;
     @Column(nullable = false)
     private String review;
 
-    public static Review getInstance(Item item, User user, int rating, String user_review) {
+    public static Review getInstance(Item item, User user, double rating, String user_review) {
         Review review = new Review();
         review.setItem(item);
         review.setUser(user);

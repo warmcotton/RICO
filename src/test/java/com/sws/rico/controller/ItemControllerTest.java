@@ -1,7 +1,6 @@
 package com.sws.rico.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sws.rico.constant.CategoryDto;
 import com.sws.rico.constant.ItemStatus;
 import com.sws.rico.dto.ItemDto;
 import com.sws.rico.entity.CategoryWrapper;
@@ -32,8 +31,8 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import javax.transaction.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 
 import static com.sws.rico.constant.CategoryDto.*;
@@ -125,7 +124,7 @@ class ItemControllerTest {
 
     @Test
     void getItemsByCategory() throws Exception {
-        mvc.perform(get("/items/category/SNEAKERS"))
+        mvc.perform(get("/items/category?category=SNEAKERS"))
                 .andDo(print()).andExpect(status().isOk());
     }
 
@@ -136,23 +135,26 @@ class ItemControllerTest {
         //Mock파일생성
         MockMultipartFile image1 = new MockMultipartFile(
                 "itemFileList", //name
-                "s24-1" + "." + contentType, //originalFilename
+                "hoody-1" + "." + contentType, //originalFilename
                 contentType,
                 "raw image bytes".getBytes()
         );
 
         MockMultipartFile image2 = new MockMultipartFile(
                 "itemFileList", //name
-                "s24-2" + "." + contentType, //originalFilename
+                "hoody-2" + "." + contentType, //originalFilename
                 contentType,
                 "raw image bytes".getBytes()
         );
 
         ItemDto itemDto = new ItemDto();
-        itemDto.setName("galaxy s24");
-        itemDto.setPrice(690000);
-        itemDto.setQuantity(2);
+        itemDto.setName("hoody");
+        itemDto.setPrice(69000);
+        itemDto.setQuantity(10);
+        itemDto.setBrief("상품 간단 소개");
+        itemDto.setDescription("상품 상세 설명   ");
         itemDto.setItemStatus(ItemStatus.FOR_SALE);
+        itemDto.setCategory(Collections.singletonList(CASUAL));
 
         String content = objectMapper.writeValueAsString(itemDto);
 
@@ -168,10 +170,13 @@ class ItemControllerTest {
     @Test
     void saveItem_NoImgFile() throws Exception {
         ItemDto itemDto = new ItemDto();
-        itemDto.setName("galaxy s24");
-        itemDto.setPrice(690000);
-        itemDto.setQuantity(2);
+        itemDto.setName("hoody");
+        itemDto.setPrice(69000);
+        itemDto.setQuantity(10);
+        itemDto.setBrief("상품 간단 소개");
+        itemDto.setDescription("상품 상세 설명   ");
         itemDto.setItemStatus(ItemStatus.FOR_SALE);
+        itemDto.setCategory(Collections.singletonList(CASUAL));
 
         String content = objectMapper.writeValueAsString(itemDto);
 
@@ -200,14 +205,14 @@ class ItemControllerTest {
     @Test
     void getUserItems_NoLogin() throws Exception {
         mvc.perform(get("/user/1/items")).andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void getItemDto_wrongItemId() throws Exception {
         mvc.perform(get("/item/100").with(user("sws@sws"))).andDo(print())
                 .andExpect(status().is4xxClientError())
-                .andExpect(result -> assertTrue(result.getResolvedException().getClass().isAssignableFrom(NoSuchElementException.class)));
+                .andExpect(result -> assertTrue(result.getResolvedException().getClass().isAssignableFrom(ItemException.class)));
     }
 
     @Test
@@ -221,17 +226,20 @@ class ItemControllerTest {
         final String contentType = "png";
 
         MockMultipartFile image1 = new MockMultipartFile(
-                "itemFileList",
-                "s24-1" + "." + contentType,
+                "itemFileList", //name
+                "hoody-2" + "." + contentType, //originalFilename
                 contentType,
                 "raw image bytes".getBytes()
         );
 
         ItemDto itemDto = new ItemDto();
-        itemDto.setName("item1_update");
-        itemDto.setPrice(100000);
-        itemDto.setQuantity(5);
+        itemDto.setName("hoody");
+        itemDto.setPrice(69000);
+        itemDto.setQuantity(10);
+        itemDto.setBrief("상품 간단 소개");
+        itemDto.setDescription("상품 상세 설명   ");
         itemDto.setItemStatus(ItemStatus.FOR_SALE);
+        itemDto.setCategory(Collections.singletonList(CASUAL));
 
         String content = objectMapper.writeValueAsString(itemDto);
 
@@ -248,17 +256,21 @@ class ItemControllerTest {
         final String contentType = "png";
 
         MockMultipartFile image1 = new MockMultipartFile(
-                "itemFileList",
-                "s24-1" + "." + contentType,
+                "itemFileList", //name
+                "hoody-2" + "." + contentType, //originalFilename
                 contentType,
                 "raw image bytes".getBytes()
         );
 
         ItemDto itemDto = new ItemDto();
-        itemDto.setName("item1_update");
-        itemDto.setPrice(100000);
-        itemDto.setQuantity(5);
+        itemDto.setName("hoody");
+        itemDto.setPrice(69000);
+        itemDto.setQuantity(10);
+        itemDto.setBrief("상품 간단 소개");
+        itemDto.setDescription("상품 상세 설명   ");
         itemDto.setItemStatus(ItemStatus.FOR_SALE);
+        itemDto.setCategory(Collections.singletonList(CASUAL));
+
 
         String content = objectMapper.writeValueAsString(itemDto);
 

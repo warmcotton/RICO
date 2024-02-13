@@ -24,7 +24,7 @@ public class OrderController {
 //    }
 
     @PostMapping ("/order/item")
-    public ResponseEntity<OrderDto> orderItemv3(@RequestBody Map<String, String> order, Authentication authentication) throws CustomException {
+    public ResponseEntity<OrderDto> orderItem(@RequestBody Map<String, String> order, Authentication authentication) throws CustomException {
         Long itemId; Integer count;
         try {
             itemId = Long.parseLong(order.get("item_id"));
@@ -57,7 +57,7 @@ public class OrderController {
 //    }
 
     @GetMapping("/order/cart")
-    public ResponseEntity<OrderDto> orderCart_v3(Authentication authentication) throws CustomException {
+    public ResponseEntity<OrderDto> orderCart(Authentication authentication) throws CustomException {
         return ResponseEntity.ok(orderService.orderCartv2(authentication.getName()));
     }
 
@@ -73,7 +73,7 @@ public class OrderController {
     }
 
     @GetMapping("/order/{orderId}/cancel")
-    public ResponseEntity<?> cancel_v2(@PathVariable Long orderId, Authentication authentication) throws CustomException {
+    public ResponseEntity<?> cancel(@PathVariable Long orderId, Authentication authentication) throws CustomException {
         if(orderId < 1) throw new IllegalArgumentException("Invalid Arguments");
         orderService.cancel(orderId, authentication.getName());
         return ResponseEntity.ok().build();

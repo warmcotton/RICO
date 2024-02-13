@@ -94,7 +94,7 @@ class UserControllerTest {
         ItemImg itemImg1 = ItemImg.getInstance("random_image_id1", "original1.png", "/images/**", "Y", item1);
         ItemImg itemImg2 = ItemImg.getInstance("random_image_id2", "original2.png", "/images/**", "N", item1);
         ItemImg itemImg3 = ItemImg.getInstance("random_image_id3", "original3.png", "/images/**", "Y", item2);
-        ItemImg itemImg4 = ItemImg.getInstance("random_image_id4", "original4.png", "/images/**", "Y", item2);
+        ItemImg itemImg4 = ItemImg.getInstance("random_image_id4", "original4.png", "/images/**", "N", item2);
         ItemImg itemImg5 = ItemImg.getInstance("random_image_id5", "original5.png", "/images/**", "Y", item3);
         ItemImg itemImg6 = ItemImg.getInstance("random_image_id6", "original6.png", "/images/**", "N", item3);
         ItemImg itemImg7 = ItemImg.getInstance("random_image_id7", "original7.png", "/images/**", "Y", item4);
@@ -138,7 +138,7 @@ class UserControllerTest {
 
 
         mvc.perform(post("/review").content(content).contentType(MediaType.APPLICATION_JSON)).andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -151,6 +151,6 @@ class UserControllerTest {
     void getReview_NoItem() throws Exception {
         mvc.perform(get("/reviews/7")).andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException().getClass().isAssignableFrom(NoSuchElementException.class)));
+                .andExpect(result -> assertTrue(result.getResolvedException().getClass().isAssignableFrom(ItemException.class)));
     }
 }

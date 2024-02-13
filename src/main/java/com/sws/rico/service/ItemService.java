@@ -10,6 +10,7 @@ import com.sws.rico.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,9 +56,18 @@ public class ItemService {
     }
 
     public List<ItemDto> getLatestItem() throws CustomException {
-        List<Item> itemList = itemRepository.findTop4ByOrderByCreatedAtDesc();
+        List<Item> itemList = itemRepository.findTop8ByOrderByCreatedAtDesc();
         List<ItemDto> itemDtos = new ArrayList<>();
         for (Item item : itemList) {
+            itemDtos.add(commonItemService.getItemDto(item.getId()));
+        }
+        return itemDtos;
+    }
+
+    public List<ItemDto> getPopularItem() throws CustomException {
+        Page<Item> itemList = itemRepository.findPopularItem(PageRequest.of(0, 8));
+        List<ItemDto> itemDtos = new ArrayList<>();
+        for (Item item : itemList.getContent()) {
             itemDtos.add(commonItemService.getItemDto(item.getId()));
         }
         return itemDtos;
@@ -137,6 +147,7 @@ public class ItemService {
         deletedItemRepository.save(deletedItem);
         itemImgRepository.deleteAllByItem(item);
         cartItemRepository.deleteAllByItem(item);
+        categoryRepository.deleteAllByItem(item);
         List<OrderItem> orderItemList = orderItemRepository.findByItem(item);
 
         for(OrderItem orderItem : orderItemList) {

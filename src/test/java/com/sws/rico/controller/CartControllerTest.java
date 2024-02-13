@@ -75,12 +75,12 @@ class CartControllerTest {
         User user1 = User.getInstance("sws@sws","1111","sws",passwordEncoder);
         User user2 = User.getInstance("jch@jch","1111","jch",passwordEncoder);
 
-        Item item1 = getItem("뉴발 991",180000,100,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user1);
-        Item item2 = getItem("나이키 덩크",200000,80,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user1);
-        Item item3 = getItem("캐주얼 자켓",160000,120,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user1);
-        Item item4 = getItem("숏 패딩",170000,110,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user1);
-        Item item5 = getItem("스포츠 양말",190000,130,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user1);
-        Item item6 = getItem("양말",150000,90,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user1);
+        Item item1 = getItem("뉴발 991",180000,100,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user2);
+        Item item2 = getItem("나이키 덩크",200000,80,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user2);
+        Item item3 = getItem("캐주얼 자켓",160000,120,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user2);
+        Item item4 = getItem("숏 패딩",170000,110,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user2);
+        Item item5 = getItem("스포츠 양말",190000,130,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user2);
+        Item item6 = getItem("양말",150000,90,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user2);
 
         CategoryWrapper c1 = CategoryWrapper.getInstance(SNEAKERS, item1);
         CategoryWrapper c2 = CategoryWrapper.getInstance(RUNNING, item1);
@@ -107,7 +107,6 @@ class CartControllerTest {
         ItemImg itemImg12 = ItemImg.getInstance("random_image_id12", "original12.png", "/images/**", "N", item6);
 
         Cart cart1 = Cart.getInstance(user1);
-        Cart cart2 = Cart.getInstance(user1);
 
         CartItem cartItem1 = CartItem.getInstance(3, item1, cart1);
         CartItem cartItem2 = CartItem.getInstance(2, item2, cart1);
@@ -117,51 +116,77 @@ class CartControllerTest {
         categoryRepository.saveAll(asSet(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10));
         itemImgRepository.saveAll(asList(itemImg1, itemImg2, itemImg3, itemImg4, itemImg5, itemImg6, itemImg7, itemImg8, itemImg9, itemImg10,
                 itemImg11, itemImg12));
-        cartRepository.saveAll(asList(cart1, cart2));
+        cartRepository.save(cart1);
         cartItemRepository.saveAll(asList(cartItem1, cartItem2));
     }
 
     @Test
     void getCarts() throws Exception {
-        mvc.perform(get("/carts").with(user("sws@sws")))
+        mvc.perform(get("/cart").with(user("sws@sws")))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
-    void getCart() throws Exception {
-        mvc.perform(get("/cart/1").with(user("sws@sws")))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void getCartItem() throws Exception {
-        mvc.perform(get("/cartItem/1").with(user("sws@sws")))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void createCart() throws Exception {
-        mvc.perform(post("/cart/create").with(user("sws@sws")))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(3));
-    }
-
-    @Test
-    void addMyItem() throws Exception {
+    void addItem() throws Exception {
         Map<String, Object> json = new LinkedHashMap<>();
 
-        json.put("itemId",1L);
-        json.put("quantity", 3);
+        json.put("item_id",5);
+        json.put("count", 3);
 
         String content = objectMapper.writeValueAsString(json);
 
-        mvc.perform(post("/cart/1/add").with(user("sws@sws"))
+        mvc.perform(post("/cart").with(user("sws@sws"))
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void addFirstItem() throws Exception {
+        Map<String, Object> json = new LinkedHashMap<>();
+
+        json.put("item_id",5);
+        json.put("count", 3);
+
+        String content = objectMapper.writeValueAsString(json);
+
+        mvc.perform(post("/cart").with(user("sws@sws"))
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+
+    @Test
+    void updateCartItem() throws Exception {
+        Map<String, Object> json = new LinkedHashMap<>();
+
+        json.put("item_id",1);
+        json.put("count", 3);
+
+        String content = objectMapper.writeValueAsString(json);
+        mvc.perform(put("/cart").with(user("sws@sws"))
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+
+    @Test
+    void updateCartItemNoItem() throws Exception {
+        Map<String, Object> json = new LinkedHashMap<>();
+
+        json.put("item_id",5);
+        json.put("count", 3);
+
+        String content = objectMapper.writeValueAsString(json);
+        mvc.perform(put("/cart").with(user("sws@sws"))
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException().getClass().isAssignableFrom(CartException.class)));
@@ -169,27 +194,8 @@ class CartControllerTest {
     }
 
     @Test
-    void updateCartItem() throws Exception {
-        mvc.perform(put("/cartItem/1").with(user("sws@sws"))
-                .param("count", "2"))
-                .andDo(print())
-                .andExpect(status().isOk());
-
-    }
-
-    @Test
-    void updateCartItem_ClientError() throws Exception {
-        mvc.perform(put("/cartItem/1").with(user("sws@sws"))
-                .param("count", "0"))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException().getClass().isAssignableFrom(IllegalArgumentException.class)));
-
-    }
-
-    @Test
     void deleteCart() throws Exception {
-        mvc.perform(delete("/cart/1").with(user("sws@sws")))
+        mvc.perform(delete("/cart").with(user("sws@sws")))
                 .andDo(print())
                 .andExpect(status().isOk());
     }

@@ -1,5 +1,6 @@
 package com.sws.rico.config;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class ForbiddenHandlers extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDeniedException() {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("토큰이 유효하지 않습니다.");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한 없음");
+    }
+    
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<?> expireJwt() {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("로그인 정보 만료");
     }
 
     @ExceptionHandler(AuthenticationException.class)

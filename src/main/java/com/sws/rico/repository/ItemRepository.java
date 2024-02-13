@@ -27,4 +27,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findTop4ByOrderByCreatedAtDesc();
     @Query(value = "select i from Item i left join CategoryWrapper c on i.id = c.item.id where c.category = :category")
     Page<Item> findByCategory(CategoryDto category, Pageable pageable);
-}
+
+    List<Item> findTop8ByOrderByCreatedAtDesc();
+
+    @Query(value = "select i from Item i left join Review r on i.id = r.item.id group by i.id order by avg(r.rating) desc")
+    Page<Item> findPopularItem(Pageable pageable);
+ }

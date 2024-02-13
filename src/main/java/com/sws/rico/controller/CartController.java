@@ -61,7 +61,7 @@ public class CartController {
 //    }
 
     @PostMapping("/cart")
-    public ResponseEntity<CartDto> addItemv2(@RequestBody Map<String, String> item, Authentication authentication) throws CustomException {
+    public ResponseEntity<CartDto> addItem(@RequestBody Map<String, String> item, Authentication authentication) throws CustomException {
         Long itemId; Integer count;
         try {
             itemId = Long.parseLong(item.get("item_id"));

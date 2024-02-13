@@ -18,7 +18,7 @@ public class ReviewDto {
     private LocalDateTime dateTime;
     @Max(5) @Min(1)
     @NotNull
-    private Integer rating;
+    private Double rating;
     @NotBlank
     @Size(min = 5, max = 1000)
     private String review;
