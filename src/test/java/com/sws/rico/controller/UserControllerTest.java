@@ -17,8 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.transaction.Transactional;
@@ -38,8 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class UserControllerTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -53,6 +55,8 @@ class UserControllerTest {
     private CategoryRepository categoryRepository;
     @Autowired
     private MockMvc mvc;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -69,6 +73,11 @@ class UserControllerTest {
     }
     @BeforeEach()
     void init() {
+        jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE item ALTER COLUMN item_id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE item_img ALTER COLUMN item_img_id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE category ALTER COLUMN category_id RESTART WITH 1");
+
         User user1 = User.createUser("sws@sws","1111","sws",passwordEncoder);
         User user2 = User.createUser("jch@jch","1111","jch",passwordEncoder);
 

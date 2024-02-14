@@ -20,14 +20,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import java.nio.charset.StandardCharsets;
@@ -45,8 +50,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class ItemControllerTest {
     @Autowired
     private OrderService orderService;
@@ -62,6 +67,8 @@ class ItemControllerTest {
     private CategoryRepository categoryRepository;
     @Autowired
     private MockMvc mvc;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -79,7 +86,12 @@ class ItemControllerTest {
 
     @BeforeEach()
     void init() {
-        User user1 = User.createUser("sws@sws","1111","sws",passwordEncoder);
+        jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE item ALTER COLUMN item_id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE item_img ALTER COLUMN item_img_id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE category ALTER COLUMN category_id RESTART WITH 1");
+
+        User user1 = User.createSupplier("sws@sws","1111","sws",passwordEncoder);
         User user2 = User.createUser("jch@jch","1111","jch",passwordEncoder);
 
         Item item1 = getItem("뉴발 991",180000,100,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user1);
@@ -159,10 +171,11 @@ class ItemControllerTest {
 
         MockMultipartFile text = new MockMultipartFile("itemDto", "itemDto", "application/json", content.getBytes(StandardCharsets.UTF_8));
 
+        GrantedAuthority authority = new SimpleGrantedAuthority("SUPPLIER");
 
         mvc.perform(
                 multipart(HttpMethod.POST,"/item")
-                        .file(image1).file(image2).file(text).with(user("sws@sws"))
+                        .file(image1).file(image2).file(text).with(user("sws@sws").authorities(authority))
         ).andDo(print()).andExpect(status().isOk());
     }
 
@@ -181,10 +194,11 @@ class ItemControllerTest {
 
         MockMultipartFile text = new MockMultipartFile("itemDto", "itemDto", "application/json", content.getBytes(StandardCharsets.UTF_8));
 
+        GrantedAuthority authority = new SimpleGrantedAuthority("SUPPLIER");
 
         mvc.perform(
                 multipart(HttpMethod.POST,"/item")
-                        .file(text).with(user("sws@sws"))
+                        .file(text).with(user("Supplier").authorities(authority))
         ).andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(result -> assertTrue(result.getResolvedException().getClass().isAssignableFrom(MissingServletRequestPartException.class)));
@@ -192,7 +206,10 @@ class ItemControllerTest {
 
     @Test
     void getMyItems() throws Exception {
-        mvc.perform(get("/user/myitems").with(user("sws@sws"))).andDo(print()).andExpect(status().isOk());
+        GrantedAuthority authority = new SimpleGrantedAuthority("SUPPLIER");
+
+        mvc.perform(get("/user/myitems").with(user("sws@sws").authorities(authority)))
+                .andDo(print()).andExpect(status().isOk());
     }
 
     @Test
@@ -244,9 +261,11 @@ class ItemControllerTest {
 
         MockMultipartFile text = new MockMultipartFile("itemDto", "itemDto", "application/json", content.getBytes(StandardCharsets.UTF_8));
 
+        GrantedAuthority authority = new SimpleGrantedAuthority("SUPPLIER");
+
         mvc.perform(
                 multipart(HttpMethod.PUT,"/item/1")
-                        .file(image1).file(text).with(user("sws@sws"))
+                        .file(image1).file(text).with(user("sws@sws").authorities(authority))
         ).andDo(print()).andExpect(status().isOk());
     }
 
@@ -275,9 +294,11 @@ class ItemControllerTest {
 
         MockMultipartFile text = new MockMultipartFile("itemDto", "itemDto", "application/json", content.getBytes(StandardCharsets.UTF_8));
 
+        GrantedAuthority authority = new SimpleGrantedAuthority("SUPPLIER");
+
         mvc.perform(
                 multipart(HttpMethod.PUT,"/item/1")
-                        .file(image1).file(text).with(user("jch@jch"))
+                        .file(image1).file(text).with(user("Supplier").authorities(authority))
         ).andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException().getClass().isAssignableFrom(ItemException.class)));
@@ -288,7 +309,9 @@ class ItemControllerTest {
     void deleteItem() throws Exception {
         orderService.orderItem(1L, 3, "jch@jch");
 
-        mvc.perform(delete("/item/1").with(user("sws@sws")))
+        GrantedAuthority authority = new SimpleGrantedAuthority("SUPPLIER");
+
+        mvc.perform(delete("/item/1").with(user("sws@sws").authorities(authority)))
                 .andDo(print()).andExpect(status().isOk());
 
     }
@@ -297,7 +320,9 @@ class ItemControllerTest {
     void deleteItem_wrongUser() throws Exception {
         orderService.orderItem(1L, 3, "jch@jch");
 
-        mvc.perform(delete("/item/1").with(user("jch@jch")))
+        GrantedAuthority authority = new SimpleGrantedAuthority("SUPPLIER");
+
+        mvc.perform(delete("/item/1").with(user("Supplier").authorities(authority)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException().getClass().isAssignableFrom(ItemException.class)));

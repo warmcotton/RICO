@@ -36,7 +36,7 @@ public class SecurtyConfig {
 
 
         http.authorizeRequests()
-                .antMatchers("/refresh","/register","/register/supplier","/reviews/*","/login").permitAll()
+                .antMatchers("/refresh","/register","/register/supplier","/reviews/*","/login","/actuator/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/category","/items","/items/banner","/items/latest","/items/popular","/items/category","/item/*").permitAll()
                 .antMatchers("/images/**", "/img/**", "/js/**", "/css/**", "/fonts/**").permitAll()
                 .antMatchers(HttpMethod.POST,"/item").hasAuthority("SUPPLIER")

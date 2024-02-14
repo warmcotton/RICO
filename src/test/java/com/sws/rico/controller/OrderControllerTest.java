@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static com.sws.rico.constant.CategoryDto.*;
@@ -19,6 +20,7 @@ import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -36,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@ActiveProfiles("test")
 public class OrderControllerTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -55,6 +57,8 @@ public class OrderControllerTest {
     @Autowired
     private MockMvc mvc;
     @Autowired
+    private JdbcTemplate jdbcTemplate;
+    @Autowired
     private ObjectMapper objectMapper;
 
     private static Item getItem(String name, int price, int quantity, ItemStatus itemStatus, String brief, String desciprtion, User user) {
@@ -70,6 +74,13 @@ public class OrderControllerTest {
     }
     @BeforeEach
     void init() {
+        jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE item ALTER COLUMN item_id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE item_img ALTER COLUMN item_img_id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE category ALTER COLUMN category_id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE cart ALTER COLUMN cart_id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE cart_item ALTER COLUMN cart_item_id RESTART WITH 1");
+
         User user1 = User.createUser("sws@sws","1111","sws",passwordEncoder);
         User user2 = User.createUser("jch@jch","1111","jch",passwordEncoder);
 

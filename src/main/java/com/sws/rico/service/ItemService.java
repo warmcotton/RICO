@@ -1,6 +1,7 @@
 package com.sws.rico.service;
 
 import com.sws.rico.constant.CategoryDto;
+import com.sws.rico.constant.Role;
 import com.sws.rico.dto.ItemDto;
 import com.sws.rico.entity.*;
 import com.sws.rico.exception.CustomException;
@@ -91,8 +92,9 @@ public class ItemService {
         return commonItemService.getItemDtoPageByEmail("", user.getEmail(),page);
     }
 
-    public Page<ItemDto> getUserItemPage(Long userId, Pageable page) throws UserException {
+    public Page<ItemDto> getUserItemPage(Long userId, Pageable page) throws CustomException {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
+        if (user.getRole()!= Role.SUPPLIER) throw new ItemException("판매자가 아닙니다.");
         return commonItemService.getItemDtoPageByEmail("", user.getEmail(),page);
     }
 

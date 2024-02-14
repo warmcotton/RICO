@@ -35,4 +35,7 @@ build/
 .vscode/
 
 sql/
-itemControllerTest_D.java
+grafana-data/
+
+DockerFile
+*.yml

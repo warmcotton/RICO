@@ -100,7 +100,7 @@ public class ItemController {
     }
 
     @GetMapping("/user/{userId}/items")
-    public ResponseEntity<Page<ItemDto>> getUserItems(@PathVariable Long userId, @PageableDefault(size=10) Pageable page) throws UserException {
+    public ResponseEntity<Page<ItemDto>> getUserItems(@PathVariable Long userId, @PageableDefault(size=10) Pageable page) throws CustomException {
         if(userId<1) throw new IllegalArgumentException("Invalid Arguments");
         return ResponseEntity.ok(itemService.getUserItemPage(userId, page));
     }
