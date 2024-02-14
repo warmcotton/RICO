@@ -1,6 +1,5 @@
 package com.sws.rico.controller;
 
-import com.sws.rico.dto.ItemDto;
 import com.sws.rico.dto.ReviewDto;
 import com.sws.rico.dto.UserDto;
 import com.sws.rico.exception.CustomException;
@@ -11,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,19 +70,15 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public UserDto register(@RequestBody HashMap<String, String> map) throws CustomException {
-        String email; String password; String name;
-        try {
-            email = map.get("email");
-            password = map.get("password");
-            name = map.get("name");
-        } catch (NullPointerException e) {
-            throw new IllegalArgumentException("Invalid Arguments");
-        }
-        if (!email.matches("^[a-zA-Z0-9]{2,20}+@[0-9a-zA-Z]+\\.[a-z]+$")
-                || !password.matches("^[a-zA-Z0-9!@#$]{8,20}$") || !name.matches("^[^\\s]{2,20}$"))
-            throw new IllegalArgumentException("Invalid Arguments");
-        return userService.registerNewUser(email,password,name);
+    public UserDto registerUser(@RequestBody HashMap<String, String> map) throws CustomException {
+        checkRegisterInfo(map);
+        return userService.registerNewUser(map.get("email"),map.get("password"),map.get("name"));
+    }
+
+    @PostMapping("/register/supplier")
+    public UserDto registerSupplier(@RequestBody HashMap<String, String> map) throws CustomException {
+        checkRegisterInfo(map);
+        return userService.registerNewSupplier(map.get("email"),map.get("password"),map.get("name"));
     }
 
     @PostMapping("/review")
@@ -129,6 +122,14 @@ public class UserController {
             token = token.substring(7);
         } else token = null;
         return token;
+    }
+
+    private void checkRegisterInfo(HashMap<String, String> map) {
+        if(map.get("email")==null || map.get("password")==null || map.get("name")==null ||
+                map.get("email").isEmpty() || map.get("password").isEmpty() || map.get("name").isEmpty()) throw new IllegalArgumentException("Invalid Arguments");
+
+        if (!(map.get("email").matches("^[a-zA-Z0-9]{2,20}+@[0-9a-zA-Z]+\\.[a-z]+$"))
+                || !(map.get("password").matches("^[a-zA-Z0-9!@#$]{8,20}$") || !(map.get("name").matches("^[^\\s]{2,20}$")))) throw new IllegalArgumentException("Invalid Arguments");
     }
 
 }

@@ -1,5 +1,5 @@
 package com.sws.rico.constant;
 
 public enum Role {
-    ADMIN, USER
+    ADMIN, USER, SUPPLIER
 }

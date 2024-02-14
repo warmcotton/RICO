@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static com.sws.rico.constant.CategoryDto.*;
@@ -28,9 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import javax.transaction.Transactional;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
@@ -73,8 +70,8 @@ public class OrderControllerTest {
     }
     @BeforeEach
     void init() {
-        User user1 = User.getInstance("sws@sws","1111","sws",passwordEncoder);
-        User user2 = User.getInstance("jch@jch","1111","jch",passwordEncoder);
+        User user1 = User.createUser("sws@sws","1111","sws",passwordEncoder);
+        User user2 = User.createUser("jch@jch","1111","jch",passwordEncoder);
 
         Item item1 = getItem("뉴발 991",180000,100,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user1);
         Item item2 = getItem("나이키 덩크",200000,80,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user1);

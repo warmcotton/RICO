@@ -55,7 +55,13 @@ public class UserService implements UserDetailsService {
 
     public UserDto registerNewUser(String email, String password, String name) throws CustomException {
         if (commonUserService.validateDuplicateEmail(email)) throw new UserException("중복된 이메일입니다.");
-        User user = userRepository.save(User.getInstance(email, password, name, passwordEncoder));
+        User user = userRepository.save(User.createUser(email, password, name, passwordEncoder));
+        return UserDto.getUserDto(user);
+    }
+
+    public UserDto registerNewSupplier(String email, String password, String name) throws CustomException {
+        if (commonUserService.validateDuplicateEmail(email)) throw new UserException("중복된 이메일입니다.");
+        User user = userRepository.save(User.createSupplier(email, password, name, passwordEncoder));
         return UserDto.getUserDto(user);
     }
 

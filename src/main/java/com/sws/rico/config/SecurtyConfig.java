@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -35,13 +36,18 @@ public class SecurtyConfig {
 
 
         http.authorizeRequests()
-                        .antMatchers("/items/**","/reviews/**","/item/**","/category","/login", "/register").permitAll()
-                        .antMatchers("/images/**", "/img/**", "/js/**", "/css/**", "/fonts/**").permitAll()
-                        .antMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                        .and().headers().frameOptions().disable()
-                        .and().addFilter(corsFilter())
-                        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider,redisTemplate),UsernamePasswordAuthenticationFilter.class);
+                .antMatchers("/refresh","/register","/register/supplier","/reviews/*","/login").permitAll()
+                .antMatchers(HttpMethod.GET, "/category","/items","/items/banner","/items/latest","/items/popular","/items/category","/item/*").permitAll()
+                .antMatchers("/images/**", "/img/**", "/js/**", "/css/**", "/fonts/**").permitAll()
+                .antMatchers(HttpMethod.POST,"/item").hasAuthority("SUPPLIER")
+                .antMatchers(HttpMethod.DELETE, "/item/*").hasAuthority("SUPPLIER")
+                .antMatchers(HttpMethod.PUT, "/item/*").hasAuthority("SUPPLIER")
+                .antMatchers(HttpMethod.GET, "/user/myitems").hasAuthority("SUPPLIER")
+                .antMatchers("/admin/**").hasAuthority("ADMIN")
+                .anyRequest().authenticated()
+                .and().headers().frameOptions().disable()
+                .and().addFilter(corsFilter())
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider,redisTemplate),UsernamePasswordAuthenticationFilter.class);
 
         http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(customAccessDeniedHandler);
 

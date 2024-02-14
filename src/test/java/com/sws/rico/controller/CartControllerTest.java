@@ -1,7 +1,6 @@
 package com.sws.rico.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sws.rico.constant.CategoryDto;
 import com.sws.rico.constant.ItemStatus;
 import com.sws.rico.entity.*;
 import com.sws.rico.exception.CartException;
@@ -26,7 +25,6 @@ import javax.transaction.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,8 +70,8 @@ class CartControllerTest {
 
     @BeforeEach
     void init() {
-        User user1 = User.getInstance("sws@sws","1111","sws",passwordEncoder);
-        User user2 = User.getInstance("jch@jch","1111","jch",passwordEncoder);
+        User user1 = User.createUser("sws@sws","1111","sws",passwordEncoder);
+        User user2 = User.createUser("jch@jch","1111","jch",passwordEncoder);
 
         Item item1 = getItem("뉴발 991",180000,100,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user2);
         Item item2 = getItem("나이키 덩크",200000,80,ItemStatus.FOR_SALE,"상품 소개 영역","상품 상세 설명 영역",user2);

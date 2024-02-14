@@ -59,7 +59,7 @@ public class ItemDto {
         itemDto.setDescription(i.getDescription());
         itemDto.setCategory(categoryDtos);
         itemDto.setItemImgDtoList(itemImgDtoList.stream().map(ItemImgDto::getItemImgDto).collect(Collectors.toList()));
-        itemDto.setUser(i.getUser().getName());
+        itemDto.setUser(i.getUser().getName()); // join fetch : no query
         return itemDto;
     }
 

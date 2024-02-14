@@ -82,18 +82,18 @@ public class ItemService {
         return itemDtos;
     }
 
-    public Page<ItemDto> getMainItemPage(String item, String user, Pageable page) {
-        return commonItemService.getItemDtoPageByEmail(item,user,page);
-    }
+//    public Page<ItemDto> getMainItemPage(String item, String user, Pageable page) {
+//        return commonItemService.getItemDtoPageByEmail("","",page);
+//    }
 
     public Page<ItemDto> getMyItemPage(String email, Pageable page) throws UserException {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
-        return commonItemService.getItemDtoPageByEmail("", user.getName(),page);
+        return commonItemService.getItemDtoPageByEmail("", user.getEmail(),page);
     }
 
     public Page<ItemDto> getUserItemPage(Long userId, Pageable page) throws UserException {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
-        return commonItemService.getItemDtoPageByEmail("", user.getName(),page);
+        return commonItemService.getItemDtoPageByEmail("", user.getEmail(),page);
     }
 
     public Page<ItemDto> getMainItemPage(String search, Pageable page) {

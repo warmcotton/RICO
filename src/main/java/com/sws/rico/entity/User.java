@@ -30,13 +30,22 @@ public class User {
     @CreatedDate
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
-    public static User getInstance(String email, String password, String name, PasswordEncoder passwordEncoder) {
+    public static User createUser(String email, String password, String name, PasswordEncoder passwordEncoder) {
         User newUser = new User();
         newUser.email = email;
         newUser.password = passwordEncoder.encode(password); //인코더
         newUser.name = name;
         newUser.role = Role.USER;
         return newUser;
+    }
+
+    public static User createSupplier(String email, String password, String name, PasswordEncoder passwordEncoder) {
+        User supplier = new User();
+        supplier.email = email;
+        supplier.password = passwordEncoder.encode(password); //인코더
+        supplier.name = name;
+        supplier.role = Role.SUPPLIER;
+        return supplier;
     }
 
     public User setInstance(UserDto userDto, PasswordEncoder passwordEncoder) {
