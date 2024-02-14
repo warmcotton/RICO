@@ -26,14 +26,6 @@ public class ItemController {
     private final ItemService itemService;
     private final CommonItemService commonItemService;
 
-//    @ResponseBody
-//    @GetMapping("/items")
-//    public ResponseEntity<Page<ItemDto>> getItems(@RequestParam(value = "item", defaultValue = "") String item,
-//                                                  @RequestParam(value = "user", defaultValue = "") String user,
-//                                                  @PageableDefault(size=10) Pageable page) {
-//        return ResponseEntity.ok(itemService.getMainItemPage(item, user, page));
-//    }
-
     @GetMapping("/category")
     public ResponseEntity<Map<String, Long>> getCategory() {
         return ResponseEntity.ok(itemService.getCategory());
@@ -47,17 +39,17 @@ public class ItemController {
     }
 
     @GetMapping("/items/banner")
-    public ResponseEntity<List<ItemDto>> getBanner() throws CustomException {
+    public ResponseEntity<List<ItemDto>> getBanner() {
         return ResponseEntity.ok(itemService.getItemBanner());
     }
 
     @GetMapping("/items/latest")
-    public ResponseEntity<List<ItemDto>> getLatest() throws CustomException {
+    public ResponseEntity<List<ItemDto>> getLatest() {
         return ResponseEntity.ok(itemService.getLatestItem());
     }
 
     @GetMapping("/items/popular")
-    public ResponseEntity<List<ItemDto>> getPopular() throws CustomException {
+    public ResponseEntity<List<ItemDto>> getPopular() {
         return ResponseEntity.ok(itemService.getPopularItem());
     }
 
@@ -69,19 +61,19 @@ public class ItemController {
     }
 
     @GetMapping("/item/{itemId}")
-    public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId) throws CustomException {
+    public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId) {
         if(itemId<1) throw new IllegalArgumentException("Invalid Arguments");
         return ResponseEntity.ok(commonItemService.getItemDto(itemId));
     }
 
     @PostMapping("/item")
-    public ResponseEntity<ItemDto> saveItem(@RequestPart List<MultipartFile> itemFileList, @RequestPart @Valid ItemDto itemDto, Authentication authentication) throws CustomException {
+    public ResponseEntity<ItemDto> saveItem(@RequestPart List<MultipartFile> itemFileList, @RequestPart @Valid ItemDto itemDto, Authentication authentication) {
         if(itemFileList.size() < 1 || itemFileList.size() > 6) throw new IllegalArgumentException("Invalid Arguments");
         return ResponseEntity.ok(itemService.createItem(itemDto, itemFileList, authentication.getName()));
     }
 
     @DeleteMapping("/item/{itemId}")
-    public ResponseEntity<?> deleteItem(@PathVariable Long itemId, Authentication authentication) throws CustomException {
+    public ResponseEntity<?> deleteItem(@PathVariable Long itemId, Authentication authentication) {
         if(itemId<1) throw new IllegalArgumentException("Invalid Arguments");
         itemService.deleteItem(itemId, authentication.getName());
         return ResponseEntity.ok().build();
@@ -89,26 +81,19 @@ public class ItemController {
 
     @PutMapping("/item/{itemId}")
     public ResponseEntity<ItemDto> updateItem(@PathVariable Long itemId, @RequestPart @Valid ItemDto itemDto,
-                              @RequestPart List<MultipartFile> itemFileList, Authentication authentication) throws CustomException {
+                              @RequestPart List<MultipartFile> itemFileList, Authentication authentication) {
         if(itemId<1) throw new IllegalArgumentException("Invalid Arguments");
         return ResponseEntity.ok(itemService.updateItem(itemId, itemDto, itemFileList, authentication.getName()));
     }
 
     @GetMapping("/user/myitems")
-    public ResponseEntity<Page<ItemDto>> getMyItems(Authentication authentication, @PageableDefault(size=10) Pageable page) throws UserException {
+    public ResponseEntity<Page<ItemDto>> getMyItems(Authentication authentication, @PageableDefault(size=10) Pageable page) {
         return ResponseEntity.ok(itemService.getMyItemPage(authentication.getName(), page));
     }
 
     @GetMapping("/user/{userId}/items")
-    public ResponseEntity<Page<ItemDto>> getUserItems(@PathVariable Long userId, @PageableDefault(size=10) Pageable page) throws CustomException {
+    public ResponseEntity<Page<ItemDto>> getUserItems(@PathVariable Long userId, @PageableDefault(size=10) Pageable page) {
         if(userId<1) throw new IllegalArgumentException("Invalid Arguments");
         return ResponseEntity.ok(itemService.getUserItemPage(userId, page));
     }
-
-//    @GetMapping("/")
-//    public String index(Model model) {
-//        model.addAttribute("bannerItemList", itemService.getItemBanner());
-//        model.addAttribute("latestItemList", itemService.getLatestItem());
-//        return "index";
-//    }
 }

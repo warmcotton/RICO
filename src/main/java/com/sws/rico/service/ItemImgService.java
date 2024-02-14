@@ -2,14 +2,13 @@ package com.sws.rico.service;
 
 import com.sws.rico.entity.Item;
 import com.sws.rico.entity.ItemImg;
-import com.sws.rico.exception.CustomException;
 import com.sws.rico.exception.FileException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,11 +16,12 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional(rollbackOn = {CustomException.class})
+@Transactional
 @RequiredArgsConstructor
 public class ItemImgService {
     @Value("${img.location}") private String imgLocation;
-    protected List<ItemImg> saveImage(Item item, List<MultipartFile> multi) throws CustomException {
+
+    protected List<ItemImg> saveImage(Item item, List<MultipartFile> multi) {
         List<ItemImg> itemImgList = new ArrayList<>();
         int count = 0;
         String repImgYn ="Y";

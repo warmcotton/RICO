@@ -24,20 +24,8 @@ public class UserController {
     private final UserService userService;
     private final CommonUserService commonUserService;
 
-//    @GetMapping("/signup")
-//    public String signUp() {
-//        return "signup";
-//    }
-
-//    @PostMapping("/signup")
-//    public String register(@RequestParam("name") String name, @RequestParam("email") String email,
-//                           @RequestParam("password") String password, @RequestParam("check") String check) throws CustomException {
-//        if(name.isEmpty() || email.isEmpty() || password.isEmpty() || check.isEmpty() || !check.equals(password)) throw new IllegalArgumentException("Invalid Arguments");
-//        return "redirect:/login";
-//    }
-
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody HashMap<String, String> map, HttpServletResponse response) throws CustomException {
+    public ResponseEntity<?> login(@RequestBody HashMap<String, String> map, HttpServletResponse response) {
         if(map.get("email")==null || map.get("password")==null || map.get("email").isEmpty() || map.get("password").isEmpty()) throw new IllegalArgumentException("Invalid Arguments");
         TokenInfo token =  userService.login(map.get("email"), map.get("password"));
         HttpHeaders headers = new HttpHeaders();
@@ -49,13 +37,8 @@ public class UserController {
         return ResponseEntity.status(200).headers(headers).build();
     }
 
-//    @GetMapping("/login")
-//    public String login() {
-//        return "login";
-//    }
-
     @GetMapping("/refresh")
-    public TokenInfo refresh(@RequestHeader("Authorization") String token) throws CustomException {
+    public TokenInfo refresh(@RequestHeader("Authorization") String token) {
         token = getToken(token);
         if(token == null) throw new IllegalArgumentException("Invalid token");
         return userService.refresh(token);
@@ -70,25 +53,25 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public UserDto registerUser(@RequestBody HashMap<String, String> map) throws CustomException {
+    public UserDto registerUser(@RequestBody HashMap<String, String> map) {
         checkRegisterInfo(map);
         return userService.registerNewUser(map.get("email"),map.get("password"),map.get("name"));
     }
 
     @PostMapping("/register/supplier")
-    public UserDto registerSupplier(@RequestBody HashMap<String, String> map) throws CustomException {
+    public UserDto registerSupplier(@RequestBody HashMap<String, String> map) {
         checkRegisterInfo(map);
         return userService.registerNewSupplier(map.get("email"),map.get("password"),map.get("name"));
     }
 
     @PostMapping("/review")
-    public ResponseEntity<List<ReviewDto>> submitReview(@RequestBody @Valid ReviewDto ReviewDto, Authentication authentication) throws CustomException {
+    public ResponseEntity<List<ReviewDto>> submitReview(@RequestBody @Valid ReviewDto ReviewDto, Authentication authentication) {
         List<ReviewDto> tmp = userService.submitReview(ReviewDto, authentication.getName());
         return ResponseEntity.ok(tmp);
     }
 
     @GetMapping("/reviews/{itemId}")
-    public ResponseEntity<List<ReviewDto>> getReview(@PathVariable Long itemId) throws CustomException {
+    public ResponseEntity<List<ReviewDto>> getReview(@PathVariable Long itemId) {
         //num = 0,1,2,3,4 ....
 
         List<ReviewDto> tmp = userService.getReview(itemId);
@@ -97,23 +80,23 @@ public class UserController {
     }
 
     @GetMapping("/user")
-    public UserDto user(Authentication authentication) throws CustomException {
+    public UserDto user(Authentication authentication) {
         return commonUserService.getUserDtoByEmail(authentication.getName());
     }
 
     @PutMapping("/user")
-    public UserDto update(@RequestBody @Valid UserDto userDto, Authentication authentication) throws CustomException {
+    public UserDto update(@RequestBody @Valid UserDto userDto, Authentication authentication) {
         return userService.update(userDto, authentication.getName());
     }
 
     @GetMapping("/user/{userId}")
-    public UserDto user(@PathVariable Long userId) throws CustomException {
+    public UserDto user(@PathVariable Long userId) {
         if(userId<1) throw new IllegalArgumentException("Invalid Arguments");
         return userService.getUserDtoById(userId);
     }
 
     @GetMapping("/users")
-    public List<UserDto> getUsers() throws CustomException {
+    public List<UserDto> getUsers() {
         return userService.getUserDtoList();
     }
 

@@ -4,25 +4,23 @@ import com.sws.rico.constant.CategoryDto;
 import com.sws.rico.constant.Role;
 import com.sws.rico.dto.ItemDto;
 import com.sws.rico.entity.*;
-import com.sws.rico.exception.CustomException;
 import com.sws.rico.exception.ItemException;
 import com.sws.rico.exception.UserException;
 import com.sws.rico.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
 import java.util.*;
 
 import static java.util.stream.Collectors.*;
 
 @Service
-@Transactional(rollbackOn = {CustomException.class})
+@Transactional
 @RequiredArgsConstructor
 public class ItemService {
     private final ItemRepository itemRepository;
@@ -31,13 +29,11 @@ public class ItemService {
     private final CartItemRepository cartItemRepository;
     private final OrderItemRepository orderItemRepository;
     private final DeletedItemRepository deletedItemRepository;
-    private final CommonUserService commonUserService;
     private final CommonItemService commonItemService;
     private final ItemImgService itemImgService;
     private final CategoryRepository categoryRepository;
-    @Value("${img.location}") private String imgLocation;
 
-    public ItemDto createItem(ItemDto itemDto, List<MultipartFile> imgList, String email) throws CustomException {
+    public ItemDto createItem(ItemDto itemDto, List<MultipartFile> imgList, String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
         Item newItem = Item.getInstance(itemDto, user);
         Item item = itemRepository.save(newItem);
@@ -56,7 +52,7 @@ public class ItemService {
         return commonItemService.getItemDto(item.getId());
     }
 
-    public List<ItemDto> getLatestItem() throws CustomException {
+    public List<ItemDto> getLatestItem() {
         List<Item> itemList = itemRepository.findTop8ByOrderByCreatedAtDesc();
         List<ItemDto> itemDtos = new ArrayList<>();
         for (Item item : itemList) {
@@ -65,7 +61,7 @@ public class ItemService {
         return itemDtos;
     }
 
-    public List<ItemDto> getPopularItem() throws CustomException {
+    public List<ItemDto> getPopularItem() {
         Page<Item> itemList = itemRepository.findPopularItem(PageRequest.of(0, 8));
         List<ItemDto> itemDtos = new ArrayList<>();
         for (Item item : itemList.getContent()) {
@@ -74,7 +70,7 @@ public class ItemService {
         return itemDtos;
     }
 
-    public List<ItemDto> getItemBanner() throws CustomException {
+    public List<ItemDto> getItemBanner() {
         List<Item> itemList = itemRepository.findTop4ByOrderByCreatedAtDesc();
         List<ItemDto> itemDtos = new ArrayList<>();
         for (Item item : itemList) {
@@ -83,16 +79,12 @@ public class ItemService {
         return itemDtos;
     }
 
-//    public Page<ItemDto> getMainItemPage(String item, String user, Pageable page) {
-//        return commonItemService.getItemDtoPageByEmail("","",page);
-//    }
-
-    public Page<ItemDto> getMyItemPage(String email, Pageable page) throws UserException {
+    public Page<ItemDto> getMyItemPage(String email, Pageable page) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
         return commonItemService.getItemDtoPageByEmail("", user.getEmail(),page);
     }
 
-    public Page<ItemDto> getUserItemPage(Long userId, Pageable page) throws CustomException {
+    public Page<ItemDto> getUserItemPage(Long userId, Pageable page) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
         if (user.getRole()!= Role.SUPPLIER) throw new ItemException("판매자가 아닙니다.");
         return commonItemService.getItemDtoPageByEmail("", user.getEmail(),page);
@@ -114,8 +106,8 @@ public class ItemService {
         return category;
     }
 
-    public ItemDto updateItem(Long id, ItemDto itemDto, List<MultipartFile> imgList, String email) throws CustomException {
-        if(!commonUserService.validateUserItem(id, email)) throw new ItemException("접근 권한이 없습니다.");
+    public ItemDto updateItem(Long id, ItemDto itemDto, List<MultipartFile> imgList, String email) {
+        if(!validateUserItem(id, email)) throw new ItemException("접근 권한이 없습니다.");
 
         Item item = itemRepository.findById(id).orElseThrow(() -> new ItemException("상품 정보가 없습니다."));
 
@@ -142,8 +134,8 @@ public class ItemService {
         return commonItemService.getItemDto(item.getId());
     }
 
-    public void deleteItem(long id, String email) throws CustomException {
-        if(!commonUserService.validateUserItem(id, email)) throw new ItemException("접근 권한이 없습니다.");
+    public void deleteItem(long id, String email) {
+        if(!validateUserItem(id, email)) throw new ItemException("접근 권한이 없습니다.");
         Item item = itemRepository.findById(id).orElseThrow(() -> new ItemException("상품 정보가 없습니다."));
         DeletedItem deletedItem = DeletedItem.getInstance(item);
         deletedItemRepository.save(deletedItem);
@@ -159,6 +151,11 @@ public class ItemService {
         itemRepository.deleteById(id);
     }
 
+    protected boolean validateUserItem(Long itemId, String email) {
+        Item item = itemRepository.findById(itemId).get();
+        return email.equals(item.getUser().getEmail());
+    }
+
     private Item getItem(Long id) {
         return itemRepository.findById(id).get();
     }
@@ -169,13 +166,4 @@ public class ItemService {
         return itemImgRepository.findAllByItem(i);
     }
 
-//    public Page<ItemDto> getItemDtoPagev2(String search, Pageable page) {
-//        return itemRepository.findPageItemv2(search, page)
-//                .map(pageItem -> ItemDto.getItemDto(pageItem,categoryRepository.findAllByItem(pageItem), getItemImgs(pageItem)));
-//    }
-
-//    private Page<ItemDto> getItemDtoPage(String item, String user, Pageable page) {
-//        return itemRepository.findPageItem(item, user, page)
-//                .map(pageItem -> ItemDto.getItemDto(pageItem, categoryRepository.findAllByItem(pageItem), getItemImgs(pageItem)));
-//    }
 }
