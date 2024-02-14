@@ -42,7 +42,7 @@ public class CommonItemService {
     }
 
     protected Page<ItemDto> getItemDtoPageByEmail(String item, String email, Pageable page) {
-        return itemRepository.findPageItem(item, email, page)
+        return itemRepository.findUserItem(item, email, page)
                 .map(pageItem -> ItemDto.getItemDto(pageItem, categoryRepository.findAllByItem(pageItem), itemImgRepository.findAllByItem(pageItem)));
     }
 

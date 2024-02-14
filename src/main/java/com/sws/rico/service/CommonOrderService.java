@@ -12,14 +12,15 @@ import com.sws.rico.exception.UserException;
 import com.sws.rico.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(rollbackFor = {CustomException.class})
 @RequiredArgsConstructor
-@Transactional(rollbackOn = {CustomException.class})
 public class CommonOrderService {
     private final ItemImgRepository itemImgRepository;
     private final OrderItemRepository orderItemRepository;
@@ -45,7 +46,7 @@ public class CommonOrderService {
     }
 
     protected Item checkItemStatus(Long itemId, int count, String email) throws CustomException {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new ItemException("상품 정보가 없습니다."));
+        Item item = itemRepository.findByIdWithPessimisticWriteLock(itemId).orElseThrow(() -> new ItemException("상품 정보가 없습니다."));
         if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("상품 판매중이 아닙니다.");
         if(item.getUser().getEmail().equals(email)) throw new OrderException("본인이 판매하는 상품은 주문할 수 없습니다.");
         boolean ct = count <= itemRepository.findById(itemId).get().getQuantity();

@@ -121,9 +121,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/static/**</exclude>
-						<exclude>**/sql/**</exclude>
 						<exclude>**/templates/**</exclude>
-						<exclude>**/application.properties</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
@@ -133,6 +131,7 @@
 				<configuration>
 					<image>
 						<builder>paketobuildpacks/builder-jammy-base:latest</builder>
+						<name>RICO:latest</name>
 					</image>
 				</configuration>
 			</plugin>
