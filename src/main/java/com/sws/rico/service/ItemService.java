@@ -52,24 +52,6 @@ public class ItemService {
         return commonItemService.getItemDto(item.getId());
     }
 
-    public List<ItemDto> getLatestItem() {
-        List<Item> itemList = itemRepository.findTop8ByOrderByCreatedAtDesc();
-        List<ItemDto> itemDtos = new ArrayList<>();
-        for (Item item : itemList) {
-            itemDtos.add(commonItemService.getItemDto(item.getId()));
-        }
-        return itemDtos;
-    }
-
-    public List<ItemDto> getPopularItem() {
-        Page<Item> itemList = itemRepository.findPopularItem(PageRequest.of(0, 8));
-        List<ItemDto> itemDtos = new ArrayList<>();
-        for (Item item : itemList.getContent()) {
-            itemDtos.add(commonItemService.getItemDto(item.getId()));
-        }
-        return itemDtos;
-    }
-
     public List<ItemDto> getItemBanner() {
         List<Item> itemList = itemRepository.findTop4ByOrderByCreatedAtDesc();
         List<ItemDto> itemDtos = new ArrayList<>();
@@ -90,13 +72,13 @@ public class ItemService {
         return commonItemService.getItemDtoPageByEmail("", user.getEmail(),page);
     }
 
-    public Page<ItemDto> getMainItemPage(String search, Pageable page) {
-        return commonItemService.getItemDtoPage(search ,page);
-    }
-
-    public Page<ItemDto> getCategoryItem(CategoryDto category, Pageable page) {
-        Page<Item> tmp = itemRepository.findByCategory(category, page);
-        return tmp.map(pageItem -> ItemDto.getItemDto(pageItem, categoryRepository.findAllByItem(pageItem), itemImgRepository.findAllByItem(pageItem)));
+    public Page<ItemDto> getMainItemPage(String search, CategoryDto category, Pageable page) {
+        if (category==null) {
+            return itemRepository.findPageItem(search, page)
+                    .map(pageItem -> ItemDto.getItemDto(pageItem,categoryRepository.findAllByItem(pageItem), itemImgRepository.findAllByItem(pageItem)));
+        } else {
+            return itemRepository.findByCategory(category, page).map(pageItem -> ItemDto.getItemDto(pageItem, categoryRepository.findAllByItem(pageItem), itemImgRepository.findAllByItem(pageItem)));
+        }
     }
 
     public Map<String, Long> getCategory() {
@@ -155,15 +137,4 @@ public class ItemService {
         Item item = itemRepository.findById(itemId).get();
         return email.equals(item.getUser().getEmail());
     }
-
-    private Item getItem(Long id) {
-        return itemRepository.findById(id).get();
-    }
-
-    private List<Item> getItems() { return itemRepository.findAll();}
-
-    private List<ItemImg> getItemImgs(Item i) {
-        return itemImgRepository.findAllByItem(i);
-    }
-
 }
