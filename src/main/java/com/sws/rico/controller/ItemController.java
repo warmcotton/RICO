@@ -2,9 +2,6 @@ package com.sws.rico.controller;
 
 import com.sws.rico.constant.CategoryDto;
 import com.sws.rico.dto.ItemDto;
-import com.sws.rico.exception.CustomException;
-import com.sws.rico.exception.UserException;
-import com.sws.rico.service.CommonItemService;
 import com.sws.rico.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,7 +21,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-    private final CommonItemService commonItemService;
 
     @GetMapping("/category")
     public ResponseEntity<Map<String, Long>> getCategory() {
@@ -47,7 +43,7 @@ public class ItemController {
     @GetMapping("/item/{itemId}")
     public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId) {
         if(itemId<1) throw new IllegalArgumentException("Invalid Arguments");
-        return ResponseEntity.ok(commonItemService.getItemDto(itemId));
+        return ResponseEntity.ok(itemService.getItem(itemId));
     }
 
     @PostMapping("/item")

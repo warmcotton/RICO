@@ -1,6 +1,5 @@
 package com.sws.rico.entity;
 
-import com.sws.rico.dto.ReviewDto;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -31,7 +30,7 @@ public class Review {
     @Column(nullable = false)
     private String review;
 
-    public static Review getInstance(Item item, User user, double rating, String user_review) {
+    public static Review createReview(Item item, User user, double rating, String user_review) {
         Review review = new Review();
         review.setItem(item);
         review.setUser(user);

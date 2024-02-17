@@ -11,21 +11,4 @@ public class ItemImgDto {
     private String oriImgName;
     private String imgUrl;
     private String repimgYn;
-
-    public static ItemImgDto getItemImgDto(ItemImg itemImg) {
-        ItemImgDto itemImgDto = new ItemImgDto();
-        itemImgDto.id = itemImg.getId();
-        itemImgDto.imgName = itemImg.getImgName();
-        itemImgDto.imgUrl = itemImg.getImgUrl();
-        itemImgDto.repimgYn = itemImg.getRepimgYn();
-        return itemImgDto;
-    }
-
-    @Override
-    public String toString() {
-        return "ItemImgDto{" +
-                "imgUrl='" + imgUrl + '\'' +
-                ", repimgYn='" + repimgYn + '\'' +
-                '}';
-    }
 }

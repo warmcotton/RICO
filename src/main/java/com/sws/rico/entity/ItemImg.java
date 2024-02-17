@@ -17,7 +17,7 @@ public class ItemImg {
     @JoinColumn(name = "item_id") @ManyToOne(fetch = FetchType.LAZY)
     private Item item;
 
-    public static ItemImg getInstance(String imgName, String oriImgName, String imgUrl, String repimgYn, Item item) {
+    public static ItemImg createItemImg(String imgName, String oriImgName, String imgUrl, String repimgYn, Item item) {
         ItemImg itemImg = new ItemImg();
         itemImg.imgName = imgName;
         itemImg.oriImgName = oriImgName;

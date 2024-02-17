@@ -18,7 +18,7 @@ public class CartItem {
     @JoinColumn(name = "cart_id") @ManyToOne(fetch = FetchType.LAZY)
     private Cart cart;
 
-    public static CartItem getInstance(int quantity, Item item, Cart newCart) {
+    public static CartItem createCartItem(int quantity, Item item, Cart newCart) {
         CartItem cartItem = new CartItem();
         cartItem.setCount(quantity);
         cartItem.setItem(item);

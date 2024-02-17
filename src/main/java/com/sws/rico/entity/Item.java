@@ -35,7 +35,7 @@ public class Item {
     @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    public static Item getInstance(ItemDto itemDto, User user) {
+    public static Item createItem(ItemDto itemDto, User user) {
         Item item = new Item();
         item.setName(itemDto.getName());
         item.setPrice(itemDto.getPrice());

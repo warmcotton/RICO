@@ -21,14 +21,4 @@ public class CartDto {
     private LocalDateTime date;
     private List<CartItemDto> cartItemDto;
     private String user;
-
-    @Override
-    public String toString() {
-        return "CartDto{" +
-                "id=" + id +
-                ", user='" + user + '\'' +
-                ", cartItemDto=" + cartItemDto +
-                ", date=" + date +
-                '}';
-    }
 }

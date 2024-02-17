@@ -38,7 +38,7 @@ public class ItemImgService {
             } catch (IOException exception) {
                 throw new FileException("file save failed");
             }
-            itemImgList.add(ItemImg.getInstance(savedFileName, oriImgName, imgUrl, repImgYn, item));
+            itemImgList.add(ItemImg.createItemImg(savedFileName, oriImgName, imgUrl, repImgYn, item));
             count++;
         }
         return itemImgList;

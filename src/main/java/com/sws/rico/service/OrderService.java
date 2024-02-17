@@ -5,6 +5,7 @@ import com.sws.rico.constant.OrderStatus;
 import com.sws.rico.dto.OrderDto;
 import com.sws.rico.entity.*;
 import com.sws.rico.exception.*;
+import com.sws.rico.mapper.OrderMapper;
 import com.sws.rico.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -28,30 +29,28 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
-    private final CommonOrderService commonOrderService;
+    private final OrderMapper orderMapper;
 
     public OrderDto getOrderDto(Long orderId, String email) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderException("주문 정보가 없습니다."));
         if (!order.getUser().getEmail().equals(email)) throw new OrderException("접근 권한 없습니다.");
-        List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
-        return commonOrderService.getOrderDto(order, orderItems);
+
+        return orderMapper.toOrderDto(order);
     }
 
     public List<OrderDto> getOrderDtoPage(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
         return orderRepository.findTop50ByUserOrderByOrderDateDesc(user)
-                .stream().map(order -> commonOrderService.getOrderDto(order, getOrderItems(order))).collect(toList());
+                .stream().map(orderMapper::toOrderDto).collect(toList());
     }
 
     public OrderDto orderItem(Long itemId, int count, String email) {
         Item item = checkItemStatus(itemId, count, email);
-        item = reduceItemQuantity(item, count);
+        reduceItemQuantity(item, count);
         Order newOrder = saveOrder(email);
+        saveOrderItem(newOrder, item, count);
 
-        newOrder = saveOrderItem(newOrder, item, count);
-
-        List<OrderItem> orderItemList = getOrderItems(newOrder);
-        return commonOrderService.getOrderDto(newOrder, orderItemList);
+        return orderMapper.toOrderDto(newOrder);
     }
 
     public OrderDto orderCartv2(String email) {
@@ -65,17 +64,17 @@ public class OrderService {
         for (CartItem cit : cartItemRepository.findByCart(cart)) {
             Item item = cit.getItem();
             item = checkItemStatus(item.getId(), cit.getCount(), email);
-            item = reduceItemQuantity(item,  cit.getCount());
+            reduceItemQuantity(item,  cit.getCount());
 
-            newOrder = saveOrderItem(newOrder, item, cit.getCount());
+            saveOrderItem(newOrder, item, cit.getCount());
 
             total += item.getPrice()*cit.getCount();
             cartItemRepository.delete(cit);
         }
         cartRepository.delete(cart);
         newOrder.setPrice(total);
-        List<OrderItem> orderItemList = getOrderItems(newOrder);
-        return commonOrderService.getOrderDto(newOrder, orderItemList);
+
+        return orderMapper.toOrderDto(newOrder);
     }
 
     public void cancel(Long orderId, String email) {
@@ -83,7 +82,7 @@ public class OrderService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderException("주문 정보가 없습니다."));
         if(order.getStatus()== OrderStatus.CANCEL) throw new OrderException("주문이 이미 취소되었습니다.");
         else if (order.getStatus() == OrderStatus.COMPLETE) throw new OrderException("배송이 이미 완료되었습니다.");
-        List<OrderItem> orderItemList = getOrderItems(order);
+        List<OrderItem> orderItemList = orderItemRepository.findByOrder(order);
         for(OrderItem orderItem : orderItemList) {
             restore(orderItem.getItem().getId(),orderItem.getCount());
         }
@@ -98,10 +97,6 @@ public class OrderService {
         orderRepository.deleteById(orderId);
     }
 
-    private List<OrderItem> getOrderItems(Order order) {
-        return orderItemRepository.findByOrder(order);
-    }
-
     private Item checkItemStatus(Long itemId, int count, String email) {
         Item item = itemRepository.findByIdWithPessimisticWriteLock(itemId).orElseThrow(() -> new ItemException("상품 정보가 없습니다."));
         if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("상품 판매중이 아닙니다.");
@@ -111,22 +106,19 @@ public class OrderService {
         return item;
     }
 
-    private Item reduceItemQuantity(Item item, int count) {
+    private void reduceItemQuantity(Item item, int count) {
         item.setQuantity(item.getQuantity() - count);
         if(item.getQuantity() - count == 0) item.setItemStatus(ItemStatus.SOLD_OUT);
-        return item;
     }
 
     private Order saveOrder(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
-        Order newOrder = orderRepository.save(Order.getInstance(user, OrderStatus.ORDER));
-        return newOrder;
+        return orderRepository.save(Order.createOrder(user, OrderStatus.ORDER));
     }
 
-    private Order saveOrderItem(Order order, Item item, int count) {
-        orderItemRepository.save(OrderItem.getInstance(item, order, count, item.getPrice()));
+    private void saveOrderItem(Order order, Item item, int count) {
+        orderItemRepository.save(OrderItem.createOrderItem(item, order, count, item.getPrice()));
         order.setPrice(item.getPrice() * count);
-        return order;
     }
 
     private void restore(long itemId, int quantity) {

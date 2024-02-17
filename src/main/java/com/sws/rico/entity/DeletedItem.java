@@ -1,6 +1,5 @@
 package com.sws.rico.entity;
 
-import com.sws.rico.constant.ItemStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -27,7 +26,7 @@ public class DeletedItem {
     @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    public static DeletedItem getInstance(Item item) {
+    public static DeletedItem createDeletedItem(Item item) {
         DeletedItem deleted = new DeletedItem();
         deleted.setName(item.getName());
         deleted.setUser(item.getUser());

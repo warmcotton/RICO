@@ -21,16 +21,4 @@ public class OrderDto {
     private LocalDateTime date;
     private List<OrderItemDto> orderItemDtoList;
     private String user;
-
-    @Override
-    public String toString() {
-        return "OrderDto{" +
-                "id=" + id +
-                ", price=" + price +
-                ", status=" + status +
-                ", date=" + date +
-                ", orderItemDtoList=" + orderItemDtoList +
-                ", user='" + user + '\'' +
-                '}';
-    }
 }

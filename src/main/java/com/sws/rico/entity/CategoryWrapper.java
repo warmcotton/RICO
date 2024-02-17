@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "category")
@@ -20,7 +19,7 @@ public class CategoryWrapper {
     @Enumerated(EnumType.STRING)
     private CategoryDto category;
 
-    public static CategoryWrapper getInstance(CategoryDto cate, Item item) {
+    public static CategoryWrapper createCategoryWrapper(CategoryDto cate, Item item) {
         CategoryWrapper cartegory = new CategoryWrapper();
         cartegory.setCategory(cate);
         cartegory.setItem(item);

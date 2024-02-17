@@ -8,6 +8,8 @@ import com.sws.rico.entity.Review;
 import com.sws.rico.entity.User;
 import com.sws.rico.exception.ItemException;
 import com.sws.rico.exception.UserException;
+import com.sws.rico.mapper.ReviewMapper;
+import com.sws.rico.mapper.UserMapper;
 import com.sws.rico.repository.ItemRepository;
 import com.sws.rico.repository.ReviewRepository;
 import com.sws.rico.repository.UserRepository;
@@ -45,23 +47,28 @@ public class UserService implements UserDetailsService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
-    private final CommonUserService commonUserService;
+    private final UserMapper userMapper;
     private final RedisTemplate<String, String> redisTemplate;
     @Value("${access.expires.time}")
     private long ACCESS_EXPIRES_TIME;
     @Value("${refresh.expires.time}")
     private long REFRESH_EXPIRES_TIME;
 
+    public UserDto getUser(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
+        return UserMapper.toUserDto(user);
+    }
+
     public UserDto registerNewUser(String email, String password, String name) {
         if (validateDuplicateEmail(email)) throw new UserException("중복된 이메일입니다.");
-        User user = userRepository.save(User.createUser(email, password, name, passwordEncoder));
-        return UserDto.getUserDto(user);
+        User user = userRepository.save(User.createUser(email, password, name, Role.USER, passwordEncoder));
+        return UserMapper.toUserDto(user);
     }
 
     public UserDto registerNewSupplier(String email, String password, String name) {
         if (validateDuplicateEmail(email)) throw new UserException("중복된 이메일입니다.");
-        User user = userRepository.save(User.createSupplier(email, password, name, passwordEncoder));
-        return UserDto.getUserDto(user);
+        User user = userRepository.save(User.createUser(email, password, name, Role.SUPPLIER, passwordEncoder));
+        return UserMapper.toUserDto(user);
     }
 
     @Override
@@ -75,7 +82,7 @@ public class UserService implements UserDetailsService {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(email, password);
 
         try {
-            User user = getUser(email);
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
             if (!passwordEncoder.matches(password, user.getPassword())) throw new IllegalArgumentException("");
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(token); //inner transactianl exeption
             TokenInfo authenticated = jwtTokenProvider.generateToken(authentication);
@@ -98,7 +105,7 @@ public class UserService implements UserDetailsService {
         if(redisTemplate.opsForValue().get("RT:"+token)==null) throw new UserException("not valid refresh token");
         String email = redisTemplate.opsForValue().get("RT:"+token);
         redisTemplate.delete("RT:"+token);
-        Role userRole = getUser(email).getRole();
+        Role userRole = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다.")).getRole();
         Authentication authentication = jwtTokenProvider.getRefreshAuthentication(email, userRole);
         TokenInfo authenticated = jwtTokenProvider.generateToken(authentication);
         redisTemplate.opsForValue().set("RT:"+authenticated.getRefreshToken(),email,REFRESH_EXPIRES_TIME, TimeUnit.MILLISECONDS);
@@ -108,44 +115,41 @@ public class UserService implements UserDetailsService {
     public List<UserDto> getUserDtoList() {
         List<UserDto> userDtos = new ArrayList<>();
         for (User user : userRepository.findAll()) {
-            userDtos.add(commonUserService.getUserDtoByEmail(user.getEmail()));
+            userDtos.add(UserMapper.toUserDto(user));
         }
         return userDtos;
     }
 
     public UserDto update(UserDto userDto, String email) {
-        User user = getUser(email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
         if (validateDuplicateEmail(userDto.getEmail())) throw new UserException("중복된 이메일입니다.");
-        return UserDto.getUserDto(user.setInstance(userDto, passwordEncoder));
+        return UserMapper.toUserDto(user.updateUser(userDto, passwordEncoder));
     }
 
     public UserDto getUserDtoById(Long userId) {
-        return UserDto.getUserDto(userRepository.findById(userId).orElseThrow(() -> new UserException("아이디 정보가 없습니다.")));
+        return UserMapper.toUserDto(userRepository.findById(userId).orElseThrow(() -> new UserException("아이디 정보가 없습니다.")));
     }
 
     public List<ReviewDto> submitReview(ReviewDto reviewDto, String email) {
         Item item = itemRepository.findById(reviewDto.getItemId()).orElseThrow(() -> new ItemException("상품 정보가 없습니다."));
-        User user = getUser(email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));;
 
         if(reviewRepository.findByItemAndUser(item, user).isPresent()) {
             throw new UserException("리뷰가 이미 작성되었습니다.");
         }
-        Review review = Review.getInstance(item, user, reviewDto.getRating(), reviewDto.getReview());
+        Review review = Review.createReview(item, user, reviewDto.getRating(), reviewDto.getReview());
         reviewRepository.save(review);
 
-        return reviewRepository.findAll().stream().map(ReviewDto::getReviewDto).collect(toList());
+        return reviewRepository.findAll().stream().map(ReviewMapper::toReviewDto).collect(toList());
     }
 
     public List<ReviewDto> getReview(Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new ItemException("상품 정보가 없습니다."));
-        return reviewRepository.findAllByItem(item).stream().map(ReviewDto::getReviewDto).collect(toList());
+        return reviewRepository.findAllByItem(item).stream().map(ReviewMapper::toReviewDto).collect(toList());
     }
 
     private boolean validateDuplicateEmail(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
 
-    private User getUser(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
-    }
 }

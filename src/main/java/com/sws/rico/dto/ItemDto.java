@@ -40,42 +40,5 @@ public class ItemDto {
     @NotEmpty
     private List<CategoryDto> category;
     private List<ItemImgDto> itemImgDtoList;
-    private String user; //
-
-    public static ItemDto getItemDto(Item i, List<CategoryWrapper> category, List<ItemImg> itemImgDtoList) {
-        ItemDto itemDto = new ItemDto();
-
-        List<CategoryDto> categoryDtos = new ArrayList<>();
-        for(CategoryWrapper categoryWrapper : category) {
-            categoryDtos.add(categoryWrapper.getCategory());
-        }
-
-        itemDto.setId(i.getId());
-        itemDto.setName(i.getName());
-        itemDto.setPrice(i.getPrice());
-        itemDto.setQuantity(i.getQuantity());
-        itemDto.setItemStatus(i.getItemStatus());
-        itemDto.setBrief(i.getBrief());
-        itemDto.setDescription(i.getDescription());
-        itemDto.setCategory(categoryDtos);
-        itemDto.setItemImgDtoList(itemImgDtoList.stream().map(ItemImgDto::getItemImgDto).collect(Collectors.toList()));
-        itemDto.setUser(i.getUser().getName()); // join fetch : no query
-        return itemDto;
-    }
-
-    @Override
-    public String toString() {
-        return "ItemDto{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", quantity=" + quantity +
-                ", itemStatus=" + itemStatus +
-                ", brief='" + brief + '\'' +
-                ", description='" + description + '\'' +
-                ", category=" + category +
-                ", itemImgDtoList=" + itemImgDtoList +
-                ", user='" + user + '\'' +
-                '}';
-    }
+    private String user;
 }

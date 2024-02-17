@@ -7,6 +7,7 @@ import com.sws.rico.entity.*;
 import com.sws.rico.exception.CartException;
 import com.sws.rico.exception.ItemException;
 import com.sws.rico.exception.UserException;
+import com.sws.rico.mapper.CartMapper;
 import com.sws.rico.repository.CartItemRepository;
 import com.sws.rico.repository.CartRepository;
 import com.sws.rico.repository.ItemRepository;
@@ -16,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,19 +29,19 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final ItemRepository itemRepository;
     private final ItemImgRepository itemImgRepository;
-    private final CommonCartService commonCartService;
+    private final CartMapper cartMapper;
 
     public CartDto createCart(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
         if(cartRepository.findByUser(user).isPresent()) throw new CartException("장바구니가 이미 생성되었습니다.");
-        Cart cart = cartRepository.save(Cart.getInstance(user));
-        return commonCartService.getCartDto(cart,new ArrayList<>());
+        Cart cart = cartRepository.save(Cart.createCart(user));
+        return cartMapper.toCartDto(cart);
     }
 
     public CartDto addItemToCart(Long itemId, int quantity, String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
         Cart cart = cartRepository.findByUser(user)
-                .orElseGet(() -> cartRepository.save(Cart.getInstance(user)));
+                .orElseGet(() -> cartRepository.save(Cart.createCart(user)));
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new ItemException("상품 정보가 없습니다."));
 
         if(item.getItemStatus()== ItemStatus.SOLD_OUT) throw new ItemException("상품 판매중이 아닙니다.");
@@ -49,19 +49,16 @@ public class CartService {
         List<Long> itemIdList = cartItemRepository.findByCart(cart).stream().map(ct -> ct.getItem().getId()).collect(Collectors.toList());
         if(itemIdList.contains(itemId)) throw new CartException("이미 추가된 상품입니다.");
 
-        CartItem cartItem = CartItem.getInstance(quantity, item, cart);
+        CartItem cartItem = CartItem.createCartItem(quantity, item, cart);
         cartItemRepository.save(cartItem);
-        List<CartItem> cartItems = cartItemRepository.findByCart(cart);
-
-        return commonCartService.getCartDto(cart, cartItems);
+        return cartMapper.toCartDto(cart);
     }
 
     public CartDto getMyCart(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("아이디 정보가 없습니다."));
         if (cartRepository.findByUser(user).isEmpty()) return null;
         Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new CartException("장바구니 정보가 없습니다."));
-        List<CartItem> cartItems = getCartItemsByCartId(cart.getId());
-        return commonCartService.getCartDto(cart, cartItems);
+        return cartMapper.toCartDto(cart);
     }
 
     public CartItemDto changeCartItemQuantity(Long itemId, int count, String email) {
@@ -78,7 +75,7 @@ public class CartService {
             throw new CartException("장바구니에 해당 상품이 없습니다.");
         }
         cartItem.setCount(count);
-        return CartItemDto.getInstance(cartItem, itemImgRepository.findAllByItem(cartItem.getItem()));
+        return cartMapper.tocartItemDto(cartItem, itemImgRepository.findAllByItem(cartItem.getItem()));
     }
 
     public void deleteCartItem(Long itemId, String email) {
@@ -103,11 +100,5 @@ public class CartService {
 
         cartItemRepository.deleteAllByCart(cart);
         cartRepository.deleteById(cart.getId());
-    }
-
-    private List<CartItem> getCartItemsByCartId(Long cartId) {
-        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartException("장바구니 정보가 없습니다."));
-        List<CartItem> cartItemList = cartItemRepository.findByCart(cart);
-        return cartItemList;
     }
 }

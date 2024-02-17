@@ -22,14 +22,4 @@ public class ReviewDto {
     @NotBlank
     @Size(min = 5, max = 1000)
     private String review;
-
-    public static ReviewDto getReviewDto(Review review) {
-        ReviewDto reviewDto = new ReviewDto();
-        reviewDto.setItemId(review.getItem().getId());
-        reviewDto.setName(review.getUser().getName());
-        reviewDto.setDateTime(review.getCreatedAt());
-        reviewDto.setRating(review.getRating());
-        reviewDto.setReview(review.getReview());
-        return reviewDto;
-    }
 }

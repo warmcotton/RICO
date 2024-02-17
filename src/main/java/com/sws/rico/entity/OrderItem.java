@@ -22,7 +22,7 @@ public class OrderItem {
     @JoinColumn(name = "delete_item_id") @ManyToOne(fetch = FetchType.LAZY)
     private DeletedItem deletedItem;
 
-    public static OrderItem getInstance(Item item, Order order, int count, int price) {
+    public static OrderItem createOrderItem(Item item, Order order, int count, int price) {
         OrderItem newOrderItem = new OrderItem();
         newOrderItem.setItem(item);
         newOrderItem.setOrder(order);

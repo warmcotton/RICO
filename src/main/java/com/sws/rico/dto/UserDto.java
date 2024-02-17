@@ -18,13 +18,4 @@ public class UserDto {
     private String name;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
-
-    public static UserDto getUserDto(User user) {
-        UserDto userDto = new UserDto();
-        userDto.id = user.getId();
-        userDto.email = user.getEmail();
-        userDto.name = user.getName();
-        userDto.createdAt = user.getCreatedAt();
-        return userDto;
-    }
 }

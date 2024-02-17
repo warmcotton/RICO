@@ -2,8 +2,6 @@ package com.sws.rico.controller;
 
 import com.sws.rico.dto.ReviewDto;
 import com.sws.rico.dto.UserDto;
-import com.sws.rico.exception.CustomException;
-import com.sws.rico.service.CommonUserService;
 import com.sws.rico.service.UserService;
 import com.sws.rico.token.TokenInfo;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +20,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final CommonUserService commonUserService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody HashMap<String, String> map, HttpServletResponse response) {
@@ -81,7 +78,7 @@ public class UserController {
 
     @GetMapping("/user")
     public UserDto user(Authentication authentication) {
-        return commonUserService.getUserDtoByEmail(authentication.getName());
+        return userService.getUser(authentication.getName());
     }
 
     @PutMapping("/user")

@@ -26,7 +26,7 @@ public class Order {
     @JoinColumn(name = "user_id") @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    public static Order getInstance(User user, OrderStatus status) {
+    public static Order createOrder(User user, OrderStatus status) {
         Order newOrder = new Order();
         newOrder.setStatus(status);
         newOrder.setUser(user);

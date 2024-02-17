@@ -18,25 +18,4 @@ public class CartItemDto {
     private Long itemId;
     private String itemName;
     private List<ItemImgDto> itemImg;
-
-    public static CartItemDto getInstance(CartItem cartItem, List<ItemImg> itemImgDtoList) {
-        CartItemDto cartItemDto = new CartItemDto();
-        cartItemDto.setCount(cartItem.getCount());
-        cartItemDto.setPrice(cartItem.getItem().getPrice());
-        cartItemDto.setItemId(cartItem.getItem().getId());
-        cartItemDto.setItemName(cartItem.getItem().getName());
-        cartItemDto.setItemImg(itemImgDtoList.stream().map(ItemImgDto::getItemImgDto).collect(Collectors.toList()));
-        return cartItemDto;
-    }
-
-    @Override
-    public String toString() {
-        return "CartItemDto{" +
-                "id=" + id +
-                ", count=" + count +
-                ", price=" + price +
-                ", itemId=" + itemId +
-                ", itemName='" + itemName + '\'' +
-                '}';
-    }
 }
