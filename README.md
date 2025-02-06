@@ -23,16 +23,26 @@ Spring Boot를 이용하여 개발한 의류 이커머스 웹사이트
 #### 주문취소
 #### 주문조회
 
+## 화면
+#### 메인페이지
+![Image](https://github.com/user-attachments/assets/78e55b41-ef94-4525-aeaf-715b14ed30ad)
+#### 상품페이지
+![Image](https://github.com/user-attachments/assets/51d72578-abd7-4ece-9e9b-25920906fc68)
+
 ## 개발 환경
 #### language
-- `Java 11`
+- `Oracle JDK 11`
 - `JavaScript`
 #### framework
 - `Spring Boot 2.7.17`
-- `Express.js`
+- `Spring Security`
 #### database
-- `MySQL`
+- `MySQL 8.0.32`
 - `h2`
-#### etc
-- `jpa`
+#### ORM
+- `Hibernate`
+- `Spring Data Jpa`
+#### infra
 - `redis`
+- `Nginx`
+- `Docker`
