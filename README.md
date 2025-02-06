@@ -4,7 +4,7 @@
 Spring Boot를 이용하여 개발한 의류 이커머스 웹사이트
 
 ### ERD
-![Image](https://github.com/user-attachments/assets/9abba6d4-8087-4f71-a369-473bfea8738d)
+![Image](https://github.com/user-attachments/assets/03bdf727-2ecf-4d89-8d31-ae935f3333be)
 
 ### 기능
 #### 로그인
